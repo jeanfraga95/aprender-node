@@ -1,0 +1,3445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ Aprenda Node.js — Do Zero ao Deploy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --preto:   #08090a;
+  --bg:      #0e1117;
+  --bg2:     #161b22;
+  --bg3:     #1c2333;
+  --bg4:     #21262d;
+  --verde:   #3fb950;
+  --verde2:  #238636;
+  --azul:    #58a6ff;
+  --roxo:    #bc8cff;
+  --amarelo: #e3b341;
+  --laranja: #f0883e;
+  --rosa:    #ff7b72;
+  --ciano:   #39d353;
+  --texto:   #e6edf3;
+  --texto2:  #8b949e;
+  --borda:   #30363d;
+  --borda2:  #21262d;
+  --acento:  #3fb950;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--texto);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════ */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: 290px; height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--borda);
+  overflow-y: auto; z-index: 100;
+  display: flex; flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borda) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 2px; }
+
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--borda);
+  background: linear-gradient(180deg, #0d1117 0%, var(--bg2) 100%);
+  position: sticky; top: 0; z-index: 10;
+}
+.sidebar-logo h1 {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em;
+  color: var(--texto);
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--verde2); color: #fff;
+  font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
+}
+.sidebar-progress {
+  margin-top: 10px; display: flex; align-items: center; gap: 8px;
+  font-size: .75rem; color: var(--texto2);
+}
+.prog-bar {
+  flex: 1; height: 3px; background: var(--borda); border-radius: 2px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; background: linear-gradient(90deg, var(--verde), var(--azul));
+  border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+.modulo-label {
+  padding: 14px 16px 5px;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--texto2);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.lesson-btn {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; text-align: left; background: none; border: none;
+  cursor: pointer; padding: 8px 16px;
+  color: var(--texto2); font-family: 'Space Grotesk', sans-serif;
+  font-size: .85rem; transition: all .15s;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.lesson-btn:hover { color: var(--texto); background: rgba(255,255,255,.04); }
+.lesson-btn.active {
+  color: var(--verde); background: rgba(63,185,80,.08);
+  border-left-color: var(--verde); font-weight: 600;
+}
+.lesson-btn.done .lesson-num::after {
+  content: '✓'; color: var(--verde); font-size: .7rem;
+}
+.lesson-num {
+  min-width: 20px; height: 20px;
+  background: var(--bg4); border-radius: 5px;
+  font-size: .7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--texto2); flex-shrink: 0;
+}
+.lesson-btn.active .lesson-num { background: var(--verde2); color: #fff; }
+.l-badge {
+  margin-left: auto; font-size: .62rem; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════ */
+#main {
+  margin-left: 290px;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+#topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(14,17,23,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--borda);
+  padding: 12px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.breadcrumb {
+  font-size: .75rem; color: var(--texto2);
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+}
+.breadcrumb span { color: var(--texto); font-weight: 600; }
+#topbar h2 {
+  font-size: 1rem; font-weight: 600; color: var(--texto);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-nav { display: flex; gap: 6px; flex-shrink: 0; }
+.nav-btn {
+  background: var(--bg4); border: 1px solid var(--borda);
+  color: var(--texto2); font-family: 'Space Grotesk', sans-serif;
+  padding: 6px 14px; border-radius: 6px; font-size: .82rem;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.nav-btn:hover { border-color: var(--verde); color: var(--verde); }
+.nav-btn:disabled { opacity: .3; cursor: default; }
+.nav-btn:disabled:hover { border-color: var(--borda); color: var(--texto2); }
+
+/* ══════════════════════════════════════════
+   CONTENT
+══════════════════════════════════════════ */
+#content {
+  padding: 36px 40px 80px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.lesson-header { margin-bottom: 28px; }
+.lesson-meta {
+  font-size: .78rem; color: var(--texto2); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.lesson-meta .mod-tag {
+  background: rgba(63,185,80,.12); color: var(--verde);
+  border: 1px solid rgba(63,185,80,.25);
+  padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  font-size: .7rem; letter-spacing: .04em;
+}
+.lesson-title { font-size: 2.1rem; font-weight: 700; letter-spacing: -.04em; line-height: 1.15; color: var(--texto); }
+.lesson-title .accent { color: var(--verde); }
+.lesson-subtitle { font-size: 1rem; color: var(--texto2); margin-top: 6px; font-weight: 400; }
+
+/* Blocos de conteúdo */
+.explain {
+  background: linear-gradient(135deg, rgba(63,185,80,.06) 0%, rgba(88,166,255,.06) 100%);
+  border: 1px solid rgba(63,185,80,.2);
+  border-radius: 12px; padding: 22px 24px; margin: 20px 0;
+  position: relative; overflow: hidden;
+}
+.explain::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: linear-gradient(180deg, var(--verde), var(--azul));
+}
+.explain-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+.explain p { margin-bottom: 10px; line-height: 1.75; }
+.explain p:last-child { margin-bottom: 0; }
+
+.analogy {
+  background: rgba(188,140,255,.07);
+  border: 1px solid rgba(188,140,255,.2);
+  border-radius: 10px; padding: 16px 20px; margin: 16px 0;
+  font-size: .92rem;
+}
+.analogy-title {
+  font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--roxo); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.card {
+  background: var(--bg2); border: 1px solid var(--borda);
+  border-radius: 10px; padding: 20px 22px; margin: 16px 0;
+}
+.card-title {
+  font-size: .92rem; font-weight: 700; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px; color: var(--texto);
+}
+
+.warning {
+  background: rgba(240,136,62,.07); border: 1px solid rgba(240,136,62,.25);
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+  font-size: .88rem; color: var(--amarelo);
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.tip {
+  background: rgba(88,166,255,.07); border: 1px solid rgba(88,166,255,.2);
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+  font-size: .88rem; color: var(--azul);
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.tip-icon, .warn-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+p { line-height: 1.75; margin-bottom: 10px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--amarelo); font-weight: 600; }
+em { color: var(--verde); font-style: normal; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 700; margin: 20px 0 10px; color: var(--texto); }
+h4 { font-size: .95rem; font-weight: 700; margin: 16px 0 8px; color: var(--texto2); }
+ul, ol { padding-left: 22px; margin: 8px 0; }
+li { margin-bottom: 5px; line-height: 1.65; }
+
+/* CODE BLOCKS */
+pre.code-block {
+  font-family: 'JetBrains Mono', monospace;
+  background: #010409;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 16px 0;
+  font-size: .84rem;
+  line-height: 1.65;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--borda);
+  font-size: .72rem; color: var(--texto2); font-family: 'JetBrains Mono', monospace;
+}
+.code-header .lang { color: var(--azul); font-weight: 700; }
+.copy-btn {
+  background: none; border: 1px solid var(--borda); color: var(--texto2);
+  padding: 2px 10px; border-radius: 4px; cursor: pointer; font-size: .7rem;
+  font-family: 'Space Grotesk', sans-serif; transition: all .15s;
+}
+.copy-btn:hover { border-color: var(--verde); color: var(--verde); }
+.code-body { padding: 16px 18px; overflow-x: auto; }
+.code-body code { background: none; padding: 0; font-size: inherit; }
+
+/* terminal look */
+pre.terminal {
+  font-family: 'JetBrains Mono', monospace;
+  background: #010409;
+  border: 1px solid #30363d;
+  border-radius: 10px; overflow: hidden;
+  margin: 14px 0; font-size: .84rem;
+}
+.term-header {
+  padding: 8px 14px; background: #161b22;
+  border-bottom: 1px solid var(--borda);
+  display: flex; align-items: center; gap: 6px;
+}
+.term-dot { width: 10px; height: 10px; border-radius: 50%; }
+.term-body { padding: 14px 18px; line-height: 1.7; }
+.term-body .prompt { color: var(--verde); }
+.term-body .cmd { color: var(--texto); }
+.term-body .out { color: var(--texto2); }
+.term-body .comment { color: #3d444d; }
+
+/* inline code */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(110,118,129,.1);
+  color: var(--rosa);
+  padding: 2px 6px; border-radius: 4px; font-size: .85em;
+  border: 1px solid rgba(110,118,129,.2);
+}
+pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+/* SYNTAX COLORS */
+.kw  { color: #ff7b72; }   /* keywords */
+.fn  { color: #d2a8ff; }   /* functions */
+.str { color: #a5d6ff; }   /* strings */
+.num { color: #79c0ff; }   /* numbers */
+.cmt { color: #3d444d; font-style: italic; }   /* comments */
+.tag { color: #ff7b72; }   /* html tags */
+.atr { color: #79c0ff; }   /* attributes */
+.val { color: #a5d6ff; }   /* values */
+.met { color: #d2a8ff; }   /* methods */
+.cls { color: #ffa657; }   /* classes */
+.var { color: #e6edf3; }   /* variables */
+.op  { color: #ff7b72; }   /* operators */
+
+/* EXERCISE BOX */
+.exercise {
+  background: rgba(63,185,80,.05);
+  border: 1px solid rgba(63,185,80,.25);
+  border-radius: 10px; padding: 18px 22px; margin: 20px 0;
+}
+.exercise-title {
+  font-size: .78rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--verde);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+.exercise ol { padding-left: 20px; }
+.exercise li { margin-bottom: 8px; }
+
+/* DIAGRAM */
+.diagram {
+  background: #010409; border: 1px solid var(--borda);
+  border-radius: 10px; padding: 20px 24px; margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: .82rem;
+  color: var(--texto2); overflow-x: auto; line-height: 1.8;
+}
+.diagram .hl { color: var(--verde); font-weight: 700; }
+.diagram .hl2 { color: var(--azul); }
+.diagram .hl3 { color: var(--amarelo); }
+.diagram .hl4 { color: var(--roxo); }
+
+/* STEP CARDS */
+.steps { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.step {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--bg3); border: 1px solid var(--borda);
+  border-radius: 8px; padding: 14px 16px;
+}
+.step-num {
+  min-width: 28px; height: 28px;
+  background: var(--verde2); color: #fff;
+  border-radius: 7px; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-family: 'JetBrains Mono', monospace;
+}
+.step-content { flex: 1; }
+.step-content strong { color: var(--texto); font-size: .92rem; display: block; margin-bottom: 3px; }
+.step-content p { font-size: .88rem; color: var(--texto2); margin: 0; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; margin: 14px 0; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th {
+  background: var(--bg3); text-align: left; padding: 10px 14px;
+  font-weight: 700; color: var(--texto2); border-bottom: 1px solid var(--borda);
+  font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--borda2); vertical-align: top; }
+tr:hover td { background: rgba(255,255,255,.02); }
+td code { font-size: .8rem; }
+
+/* CHAT */
+#chat-panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 380px;
+  background: var(--bg2); border-left: 1px solid var(--borda);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  z-index: 200;
+}
+#chat-panel.open { transform: translateX(0); }
+
+.chat-header {
+  padding: 14px 18px;
+  background: linear-gradient(90deg, #1a2a1a, #1a1a2e);
+  border-bottom: 1px solid var(--borda);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.chat-header h3 { font-size: .95rem; font-weight: 700; color: var(--texto); display: flex; align-items: center; gap: 6px; }
+.chat-hbtns { display: flex; gap: 6px; }
+.chat-hbtns button {
+  background: rgba(255,255,255,.07); border: 1px solid var(--borda);
+  color: var(--texto2); width: 28px; height: 28px; border-radius: 6px;
+  cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.chat-hbtns button:hover { border-color: var(--verde); color: var(--verde); }
+
+.chat-setup {
+  padding: 16px; background: rgba(63,185,80,.05);
+  border-bottom: 1px solid var(--borda); font-size: .83rem; line-height: 1.6;
+}
+.chat-setup p { margin-bottom: 8px; color: var(--texto2); }
+.chat-setup a { color: var(--azul); }
+.chat-setup select, .chat-setup input[type="password"] {
+  width: 100%; background: var(--bg3); color: var(--texto);
+  border: 1px solid var(--borda); border-radius: 7px; padding: 7px 10px;
+  font-family: 'Space Grotesk', sans-serif; font-size: .83rem; margin-bottom: 7px;
+  outline: none; transition: border-color .15s;
+}
+.chat-setup input:focus { border-color: var(--verde); }
+.chat-setup select:focus { border-color: var(--verde); }
+
+#chat-messages {
+  flex: 1; overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  scrollbar-width: thin; scrollbar-color: var(--borda) transparent;
+}
+.msg { max-width: 92%; border-radius: 10px; padding: 10px 13px; font-size: .88rem; line-height: 1.6; animation: msgIn .2s ease; }
+@keyframes msgIn { from { opacity:0; transform:translateY(6px); } }
+.msg.user { align-self: flex-end; background: #1f4a2e; color: var(--texto); border-radius: 10px 10px 2px 10px; }
+.msg.ai { align-self: flex-start; background: var(--bg3); color: var(--texto); border-radius: 10px 10px 10px 2px; }
+.msg.ai strong { color: var(--verde); }
+.msg.ai code { font-size: .8em; }
+.msg.ai pre { background: #010409; border: 1px solid var(--borda); border-radius: 6px; padding: 8px 10px; margin: 6px 0; font-size: .78rem; overflow-x: auto; }
+.msg-loading { display: flex; gap: 4px; align-items: center; padding: 10px 13px; }
+.dot { width:7px;height:7px;border-radius:50%;background:var(--texto2);animation:blink 1.2s infinite; }
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+.chat-input-area { padding: 10px 14px; border-top: 1px solid var(--borda); display: flex; gap: 7px; }
+#chat-input {
+  flex: 1; background: var(--bg3); border: 1px solid var(--borda); color: var(--texto);
+  border-radius: 8px; padding: 8px 12px; font-family: 'Space Grotesk', sans-serif;
+  font-size: .88rem; resize: none; outline: none; max-height: 100px;
+  transition: border-color .15s;
+}
+#chat-input:focus { border-color: var(--verde); }
+#chat-send {
+  background: var(--verde2); border: none; color: #fff; border-radius: 8px;
+  width: 38px; cursor: pointer; font-size: 1.1rem; transition: opacity .15s;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+#chat-send:hover { opacity: .8; }
+
+#chat-fab {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--verde2); border: none; color: #fff;
+  width: 52px; height: 52px; border-radius: 50%;
+  cursor: pointer; font-size: 1.3rem;
+  box-shadow: 0 4px 24px rgba(35,134,54,.5);
+  z-index: 190; transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+}
+#chat-fab:hover { transform: scale(1.1); background: var(--verde); }
+
+/* MOBILE */
+#menu-toggle {
+  display: none; position: fixed; top: 12px; left: 12px; z-index: 300;
+  background: var(--bg2); border: 1px solid var(--borda); color: var(--texto);
+  border-radius: 7px; padding: 7px 10px; cursor: pointer; font-size: 1.1rem;
+}
+#overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  z-index: 90; backdrop-filter: blur(2px);
+}
+#overlay.show { display: block; }
+
+@media(max-width: 960px) {
+  #sidebar { transform: translateX(-100%); transition: transform .3s; }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  #menu-toggle { display: flex; }
+  #content { padding: 20px 18px 80px; }
+  #topbar { padding: 10px 16px 10px 52px; }
+  .lesson-title { font-size: 1.6rem; }
+  #chat-panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- sidebar -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <h1>
+      <span>⚙️</span>
+      Aprenda Node.js
+    </h1>
+    <div style="margin-top:6px">
+      <span class="logo-badge">Backend</span>
+    </div>
+    <div class="sidebar-progress">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <span id="prog-text">0%</span>
+    </div>
+  </div>
+  <div id="menu-list"></div>
+</aside>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+<button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+<!-- main -->
+<div id="main">
+  <div id="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="breadcrumb" id="breadcrumb">Módulo 1 · <span>Introdução</span></div>
+        <h2 id="topbar-title">O que é Node.js?</h2>
+      </div>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn" id="btn-prev" onclick="changeLesson(-1)" disabled>← Anterior</button>
+      <button class="nav-btn" id="btn-next" onclick="changeLesson(1)">Próxima →</button>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<!-- chat -->
+<div id="chat-panel">
+  <div class="chat-header">
+    <h3>🤖 Assistente Node.js</h3>
+    <div class="chat-hbtns">
+      <button onclick="abrirSetupChat()" title="Configurar IA">⚙️</button>
+      <button onclick="toggleChat()" title="Fechar">✕</button>
+    </div>
+  </div>
+  <div id="chat-setup-box" class="chat-setup" style="display:none">
+    <p><strong>Configure seu assistente IA gratuito:</strong></p>
+    <select id="ai-provider" onchange="atualizarAjudaProvider()">
+      <option value="gemini">Google Gemini (grátis)</option>
+      <option value="anthropic">Anthropic Claude</option>
+    </select>
+    <input type="password" id="ai-key" placeholder="Cole sua chave de API aqui">
+    <p id="ai-help">Pega sua chave gratuita em <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a></p>
+    <button class="nav-btn" style="width:100%;background:var(--verde2);color:#fff;border-color:var(--verde2)" onclick="salvarChave()">💾 Salvar e usar</button>
+  </div>
+  <div id="chat-messages">
+    <div class="msg ai">Oi! 👋 Sou seu professor de Node.js! Pode perguntar qualquer coisa — <strong>dúvidas, erros, exemplos</strong>. Tô aqui pra ajudar! 😊</div>
+  </div>
+  <div class="chat-input-area">
+    <textarea id="chat-input" rows="1" placeholder="Pergunta algo sobre Node.js..."
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+    <button id="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+<button id="chat-fab" onclick="toggleChat()" title="Tirar dúvidas com IA">🤖</button>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// LIÇÕES
+// ═══════════════════════════════════════════════════════════════════════════
+const L = lessons => lessons; // alias pra manter auto-indent
+
+const lessons = [
+
+// ─── MÓDULO 1 ────────────────────────────────────────────────────────────
+{
+  modulo: "Módulo 1 — O que é Node.js",
+  id:"o-que-e-node", icon:"🌱", num:1,
+  badge:"Início", badgeColor:"#3fb950",
+  title:"O que é Node.js?",
+  subtitle:"Entendendo o que acontece por baixo de todo site",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🍕</span>
+      <p>Imagina uma <strong>pizzaria</strong>. Quando você liga pedindo uma pizza, tem uma pessoa do outro lado que te atende, anota o pedido, passa pra cozinha e te fala quando vai chegar.</p>
+      <p>Num site, quando você clica em "fazer login", alguém precisa receber esse clique, verificar se a senha está certa, buscar seus dados e te responder. Isso é o que o <em>backend</em> faz — e o <em>Node.js</em> é uma das ferramentas mais usadas pra fazer isso!</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🎯 A analogia perfeita</div>
+      <p>Pensa assim: o <strong>HTML/CSS/JavaScript do navegador</strong> é o que você <em>vê</em> (a fachada da pizzaria). O <em>Node.js</em> é a <strong>cozinha</strong> — o lugar onde as coisas realmente acontecem, que você não vê, mas que faz tudo funcionar.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤔 Mas espera — JavaScript não roda no navegador?</div>
+      <p>Sim! Por muitos anos, JavaScript <strong>só</strong> rodava dentro do navegador. Aí em 2009, um cara chamado Ryan Dahl teve uma ideia genial:</p>
+      <p><em>"E se eu pegar o motor que o Google Chrome usa pra rodar JavaScript (chamado V8) e colocar ele no computador, fora do navegador?"</em></p>
+      <p>E assim nasceu o <strong>Node.js</strong>! Agora você pode usar JavaScript pra criar servidores, acessar arquivos, conectar em bancos de dados — tudo fora do navegador.</p>
+    </div>
+
+    <div class="diagram">
+<span class="hl">SEM Node.js:</span>
+
+  Navegador  ──── JavaScript ────►  Só roda aqui dentro
+
+
+<span class="hl">COM Node.js:</span>
+
+  Navegador  ──── JavaScript ──►  Navegador (frontend)
+                       │
+                       └──────►  <span class="hl2">Servidor (backend)</span>  ──►  Banco de dados
+                       │
+                       └──────►  <span class="hl3">Terminal / Scripts</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚡ Por que Node.js é tão popular?</div>
+      <ul>
+        <li><strong>Uma linguagem só:</strong> você aprende JavaScript e usa tanto no frontend quanto no backend</li>
+        <li><strong>Muito rápido:</strong> Node.js foi feito pra lidar com muitas requisições ao mesmo tempo</li>
+        <li><strong>Enorme comunidade:</strong> existe um pacote pronto pra quase tudo que você precisar</li>
+        <li><strong>Usado por gigantes:</strong> Netflix, LinkedIn, Uber, PayPal — todos usam Node.js</li>
+      </ul>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Exercício mental</div>
+      <p>Pensa em um site que você usa todo dia (Instagram, YouTube, etc). Tenta identificar:</p>
+      <ol>
+        <li>O que é o <strong>frontend</strong>? (o que você vê e clica)</li>
+        <li>O que precisaria ter no <strong>backend</strong>? (o que acontece "nos bastidores")</li>
+      </ol>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"ambiente-node", icon:"🖥️", num:2,
+  badge:"Início", badgeColor:"#3fb950",
+  title:"O ambiente Node.js",
+  subtitle:"Como o computador vira um servidor",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🖥️</span>
+      <p>Quando você instala o Node.js, o seu computador ganha um superpoder: ele consegue <strong>executar JavaScript fora do navegador</strong>, diretamente no sistema operacional.</p>
+      <p>Isso significa que um arquivo <code>.js</code> pode agora ler arquivos do HD, criar conexões de rede, escutar por requisições — coisas que o JavaScript do navegador nunca conseguiria fazer por segurança.</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🏠 Analogia: sua casa virando um hotel</div>
+      <p>Seu computador normalmente é só pra você (como uma casa). Quando você roda um servidor Node.js, você está <strong>abrindo a porta</strong> e dizendo: <em>"Pode entrar, aceito pedidos aqui!"</em> — seu computador vira um hotel que atende visitantes (requisições).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🧩 O que existe no ambiente Node</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Ferramenta</th><th>O que é</th><th>Analogia</th></tr>
+          <tr><td><code>node</code></td><td>O executor de JavaScript</td><td>O funcionário que lê e executa as instruções</td></tr>
+          <tr><td><code>npm</code></td><td>Gerenciador de pacotes</td><td>O mercadinho onde você compra ferramentas prontas</td></tr>
+          <tr><td><code>package.json</code></td><td>A "receita" do projeto</td><td>A lista de ingredientes da sua pizza</td></tr>
+          <tr><td><code>node_modules</code></td><td>Pacotes instalados</td><td>A despensa cheia de ingredientes comprados</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📁 Como fica a estrutura de um projeto Node</div>
+      <div class="diagram">
+meu-projeto/
+├── <span class="hl">package.json</span>      ← a "identidade" do projeto (nome, versão, dependências)
+├── <span class="hl2">node_modules/</span>     ← pacotes instalados (nunca mexa aqui)
+├── <span class="hl3">server.js</span>         ← seu arquivo principal
+├── <span class="hl3">routes/</span>           ← onde ficam as rotas da API
+│   ├── usuarios.js
+│   └── produtos.js
+├── <span class="hl3">database/</span>         ← arquivos do banco de dados
+└── <span class="hl4">.env</span>              ← senhas e configurações secretas
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 Como o Node processa uma requisição</div>
+      <div class="diagram">
+  <span class="hl2">Navegador</span>                    <span class="hl">Servidor Node.js</span>
+
+  "GET /usuarios"  ──────────►  Recebe a requisição
+                                │
+                                ├──► Processa (busca no banco, etc)
+                                │
+  ◄──────────  { dados }  ◄────┘  Envia a resposta
+      </div>
+      <p>Isso acontece em <strong>milissegundos</strong>! E o Node consegue fazer isso com <em>milhares de usuários ao mesmo tempo</em>.</p>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>Assíncrono:</strong> a grande maravilha do Node é que enquanto espera o banco de dados responder, ele <em>não fica parado</em> — ele atende outras requisições. É como um garçom que anota seu pedido e já vai atender outra mesa enquanto a cozinha prepara o seu.</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"instalando-node", icon:"📥", num:3,
+  badge:"Início", badgeColor:"#3fb950",
+  title:"Instalando o Node.js",
+  subtitle:"Preparando o ambiente do zero",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📥</span>
+      <p>Antes de escrever qualquer código, precisamos instalar o Node.js no computador. É como comprar e instalar o programa antes de usar.</p>
+      <p>O processo é bem simples e gratuito!</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Acesse o site oficial</strong>
+          <p>Vá em <code>nodejs.org</code> — você vai ver dois botões: <strong>LTS</strong> (Long Term Support) e Current. Sempre escolha o <em>LTS</em> — é o mais estável e recomendado para produção.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Baixe e instale</strong>
+          <p>Clique em download e siga o instalador normalmente (Next, Next, Finish). Ele vai instalar o <code>node</code> e o <code>npm</code> automaticamente.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Verifique a instalação</strong>
+          <p>Abra o terminal (CMD no Windows, Terminal no Mac/Linux) e rode os comandos abaixo:</p>
+        </div>
+      </div>
+    </div>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;font-size:.75rem;color:#8b949e">Terminal</span>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">node --version</span>
+<span class="out">v20.11.0</span>   <span class="comment"># qualquer versão 18+ está ótimo</span>
+
+<span class="prompt">$</span> <span class="cmd">npm --version</span>
+<span class="out">10.2.4</span>    <span class="comment"># npm vem junto com o Node</span>
+      </div>
+    </pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>Dica pro:</strong> instale o <strong>VS Code</strong> como editor de código (code.visualstudio.com). Ele tem terminal embutido, extensões pra Node.js e é o editor mais usado no mundo para JavaScript.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔧 Extensões VS Code recomendadas</div>
+      <ul>
+        <li><code>ESLint</code> — avisa sobre erros de código antes de rodar</li>
+        <li><code>Prettier</code> — formata o código automaticamente</li>
+        <li><code>Thunder Client</code> — testa APIs sem sair do VS Code</li>
+        <li><code>GitLens</code> — integração com Git</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📂 Criando seu primeiro projeto</div>
+      <p>Todo projeto Node começa com o mesmo ritual — criar uma pasta e inicializar o projeto:</p>
+      <pre class="terminal">
+        <div class="term-header">
+          <div class="term-dot" style="background:#ff5f57"></div>
+          <div class="term-dot" style="background:#febc2e"></div>
+          <div class="term-dot" style="background:#28c840"></div>
+        </div>
+        <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">mkdir meu-primeiro-servidor</span>
+<span class="prompt">$</span> <span class="cmd">cd meu-primeiro-servidor</span>
+<span class="prompt">$</span> <span class="cmd">npm init -y</span>
+<span class="out">Wrote to /meu-primeiro-servidor/package.json</span>
+        </div>
+      </pre>
+      <p>O <code>npm init -y</code> cria o arquivo <code>package.json</code> automaticamente (o <code>-y</code> responde "sim" pra tudo).</p>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"npm-pacotes", icon:"📦", num:4,
+  badge:"Início", badgeColor:"#3fb950",
+  title:"npm — o mercadinho de pacotes",
+  subtitle:"Usando código pronto de outras pessoas",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📦</span>
+      <p>Imagina que você quer fazer um bolo. Você pode plantar o trigo, moer a farinha, criar o açúcar do zero... ou pode <strong>comprar no mercado</strong> os ingredientes já prontos.</p>
+      <p>O <em>npm</em> (Node Package Manager) é esse mercadinho! São mais de <strong>2 milhões de pacotes</strong> de código pronto que você pode usar de graça no seu projeto.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛒 Comandos essenciais do npm</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Comando</th><th>O que faz</th></tr>
+          <tr><td><code>npm init -y</code></td><td>Cria o package.json (inicia o projeto)</td></tr>
+          <tr><td><code>npm install express</code></td><td>Instala um pacote</td></tr>
+          <tr><td><code>npm install</code></td><td>Instala tudo do package.json (clonou um projeto? rode isso)</td></tr>
+          <tr><td><code>npm install -D nodemon</code></td><td>Instala como dependência de desenvolvimento</td></tr>
+          <tr><td><code>npm uninstall express</code></td><td>Remove um pacote</td></tr>
+          <tr><td><code>npm run start</code></td><td>Roda o script "start" do package.json</td></tr>
+          <tr><td><code>npm run dev</code></td><td>Roda o script "dev" do package.json</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 O package.json por dentro</div>
+      <p>Depois de instalar alguns pacotes, seu <code>package.json</code> fica assim:</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JSON</span><span>package.json</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code>{
+  <span class="str">"name"</span>: <span class="str">"meu-servidor"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"start"</span>: <span class="str">"node server.js"</span>,      <span class="cmt">// roda em produção</span>
+    <span class="str">"dev"</span>: <span class="str">"nodemon server.js"</span>    <span class="cmt">// roda em desenvolvimento (auto-reload)</span>
+  },
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"express"</span>: <span class="str">"^4.18.2"</span>          <span class="cmt">// pacotes necessários pra rodar</span>
+  },
+  <span class="str">"devDependencies"</span>: {
+    <span class="str">"nodemon"</span>: <span class="str">"^3.0.1"</span>           <span class="cmt">// pacotes só pra desenvolvimento</span>
+  }
+}</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔍 dependencies vs devDependencies</div>
+      <div class="analogy" style="margin-top:10px">
+        <div class="analogy-title">🎯 Analogia</div>
+        <p><strong>dependencies</strong> = ingredientes que vão no prato final (o cliente come)</p>
+        <p><strong>devDependencies</strong> = utensílios de cozinha que você usa pra preparar, mas não vão no prato (o cliente não vê)</p>
+      </div>
+    </div>
+
+    <div class="warning">
+      <span class="warn-icon">⚠️</span>
+      <div><strong>Nunca commite o node_modules!</strong> Adicione <code>node_modules</code> no seu <code>.gitignore</code>. Ele pode ter centenas de MB. Qualquer pessoa que clonar seu projeto roda <code>npm install</code> e o npm baixa tudo automaticamente pelo package.json.</div>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Exercício prático</div>
+      <ol>
+        <li>Crie uma pasta chamada <code>aprendendo-node</code></li>
+        <li>Rode <code>npm init -y</code> dentro dela</li>
+        <li>Abra o <code>package.json</code> gerado e entenda cada campo</li>
+        <li>Crie um arquivo <code>.gitignore</code> com o conteúdo: <code>node_modules</code></li>
+      </ol>
+    </div>
+  `
+},
+
+// ─── MÓDULO 2 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 2 — Criando Servidores",
+  id:"primeiro-arquivo", icon:"📄", num:5,
+  badge:"Básico", badgeColor:"#3fb950",
+  title:"Seu primeiro arquivo Node.js",
+  subtitle:"Olá Mundo no terminal e módulos nativos",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📄</span>
+      <p>Vamos finalmente escrever código! O primeiro passo é o clássico <em>"Olá Mundo"</em> — mas agora no terminal, não no navegador.</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>ola-mundo.js</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// Este código roda no Node.js, não no navegador!</span>
+console.<span class="met">log</span>(<span class="str">"Olá Mundo! 👋"</span>);
+
+<span class="cmt">// No Node, temos acesso a coisas que o navegador não tem</span>
+console.<span class="met">log</span>(<span class="str">"Sistema operacional:"</span>, process.platform);
+console.<span class="met">log</span>(<span class="str">"Versão do Node:"</span>, process.version);
+console.<span class="met">log</span>(<span class="str">"Pasta atual:"</span>, process.cwd());</code></div></pre>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">node ola-mundo.js</span>
+<span class="out">Olá Mundo! 👋</span>
+<span class="out">Sistema operacional: linux</span>
+<span class="out">Versão do Node: v20.11.0</span>
+<span class="out">Pasta atual: /home/usuario/aprendendo-node</span>
+      </div>
+    </pre>
+
+    <div class="card">
+      <div class="card-title">📦 Módulos nativos do Node.js</div>
+      <p>O Node vem com vários módulos embutidos (sem precisar instalar nada). Os mais úteis:</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Módulo</th><th>O que faz</th></tr>
+          <tr><td><code>fs</code></td><td>Ler e escrever arquivos</td></tr>
+          <tr><td><code>path</code></td><td>Trabalhar com caminhos de arquivo</td></tr>
+          <tr><td><code>http</code></td><td>Criar servidores HTTP</td></tr>
+          <tr><td><code>os</code></td><td>Informações do sistema operacional</td></tr>
+          <tr><td><code>crypto</code></td><td>Criptografia e hashes</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>usando-modulos.js</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// 'require' importa um módulo (jeito antigo mas ainda muito usado)</span>
+<span class="kw">const</span> <span class="var">fs</span> = <span class="fn">require</span>(<span class="str">'fs'</span>);
+<span class="kw">const</span> <span class="var">path</span> = <span class="fn">require</span>(<span class="str">'path'</span>);
+
+<span class="cmt">// Escrevendo um arquivo</span>
+fs.<span class="met">writeFileSync</span>(<span class="str">'ola.txt'</span>, <span class="str">'Olá, arquivo!'</span>);
+console.<span class="met">log</span>(<span class="str">'Arquivo criado!'</span>);
+
+<span class="cmt">// Lendo um arquivo</span>
+<span class="kw">const</span> <span class="var">conteudo</span> = fs.<span class="met">readFileSync</span>(<span class="str">'ola.txt'</span>, <span class="str">'utf8'</span>);
+console.<span class="met">log</span>(<span class="str">'Conteúdo:'</span>, conteudo);
+
+<span class="cmt">// Trabalhando com paths</span>
+<span class="kw">const</span> <span class="var">caminho</span> = path.<span class="met">join</span>(__dirname, <span class="str">'pasta'</span>, <span class="str">'arquivo.txt'</span>);
+console.<span class="met">log</span>(<span class="str">'Caminho completo:'</span>, caminho);</code></div></pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>require vs import:</strong> O Node tem dois sistemas de módulos. O <code>require()</code> é o clássico (CommonJS). O <code>import/export</code> é o moderno (ES Modules). A maioria dos projetos ainda usa <code>require</code>, mas os dois funcionam.</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"servidor-http", icon:"🌐", num:6,
+  badge:"Básico", badgeColor:"#3fb950",
+  title:"Criando um servidor com HTTP puro",
+  subtitle:"Entendendo o que o Express faz por baixo dos panos",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🌐</span>
+      <p>Antes de usar o Express, vamos criar um servidor do <strong>zero</strong> usando só o módulo <code>http</code> que vem com o Node.</p>
+      <p>Isso é importante pra você entender o que está acontecendo por baixo dos panos — e por que o Express foi criado!</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>servidor-http.js</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">http</span> = <span class="fn">require</span>(<span class="str">'http'</span>);
+
+<span class="cmt">// Criamos um servidor que recebe requisições</span>
+<span class="kw">const</span> <span class="var">servidor</span> = http.<span class="met">createServer</span>(<span class="kw">function</span>(<span class="var">req</span>, <span class="var">res</span>) {
+  <span class="cmt">// req = requisição (o pedido que chegou)</span>
+  <span class="cmt">// res = resposta (o que vamos mandar de volta)</span>
+
+  console.<span class="met">log</span>(<span class="str">'Recebi uma requisição em:'</span>, req.url);
+
+  <span class="kw">if</span> (req.url === <span class="str">'/'</span>) {
+    res.<span class="met">writeHead</span>(<span class="num">200</span>, { <span class="str">'Content-Type'</span>: <span class="str">'text/html; charset=utf-8'</span> });
+    res.<span class="met">end</span>(<span class="str">'&lt;h1&gt;Página inicial! 🏠&lt;/h1&gt;'</span>);
+
+  } <span class="kw">else if</span> (req.url === <span class="str">'/sobre'</span>) {
+    res.<span class="met">writeHead</span>(<span class="num">200</span>, { <span class="str">'Content-Type'</span>: <span class="str">'text/html; charset=utf-8'</span> });
+    res.<span class="met">end</span>(<span class="str">'&lt;h1&gt;Sobre nós! ℹ️&lt;/h1&gt;'</span>);
+
+  } <span class="kw">else</span> {
+    res.<span class="met">writeHead</span>(<span class="num">404</span>);
+    res.<span class="met">end</span>(<span class="str">'Página não encontrada 😢'</span>);
+  }
+});
+
+<span class="cmt">// O servidor começa a escutar na porta 3000</span>
+servidor.<span class="met">listen</span>(<span class="num">3000</span>, <span class="kw">function</span>() {
+  console.<span class="met">log</span>(<span class="str">'Servidor rodando em http://localhost:3000'</span>);
+});</code></div></pre>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">node servidor-http.js</span>
+<span class="out">Servidor rodando em http://localhost:3000</span>
+<span class="comment"># Agora abra http://localhost:3000 no navegador!</span>
+      </div>
+    </pre>
+
+    <div class="analogy">
+      <div class="analogy-title">🎯 O que é uma porta?</div>
+      <p>Imagine que o computador é um prédio com <strong>65.535 apartamentos</strong>. Cada porta é um número. O servidor "mora" numa porta e fica esperando visitas ali. A porta <code>3000</code> é uma das favoritas dos devs. Na internet, sites normais usam a porta <code>80</code> (HTTP) ou <code>443</code> (HTTPS).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔢 Códigos de status HTTP — o que significam</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Código</th><th>Significa</th><th>Analogia</th></tr>
+          <tr><td><code>200</code></td><td>OK — deu certo!</td><td>"Aqui está seu pedido!"</td></tr>
+          <tr><td><code>201</code></td><td>Created — criou algo</td><td>"Cadastrado com sucesso!"</td></tr>
+          <tr><td><code>400</code></td><td>Bad Request — pedido errado</td><td>"Não entendi seu pedido"</td></tr>
+          <tr><td><code>401</code></td><td>Unauthorized — não autenticado</td><td>"Quem é você? Faça login"</td></tr>
+          <tr><td><code>403</code></td><td>Forbidden — sem permissão</td><td>"Você não pode entrar aqui"</td></tr>
+          <tr><td><code>404</code></td><td>Not Found — não encontrou</td><td>"Essa página não existe"</td></tr>
+          <tr><td><code>500</code></td><td>Internal Server Error — erro no servidor</td><td>"A cozinha pegou fogo 🔥"</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="warning">
+      <span class="warn-icon">⚠️</span>
+      <div>Percebeu como o código com HTTP puro é verboso? Imagine ter 50 rotas assim... É por isso que o <strong>Express</strong> foi criado — a próxima lição vai mostrar como o mesmo servidor fica muito mais limpo!</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"express-por-que", icon:"🚀", num:7,
+  badge:"Básico", badgeColor:"#3fb950",
+  title:"Express.js — por que usar?",
+  subtitle:"Do código verboso ao servidor elegante",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🚀</span>
+      <p>O <em>Express</em> é o framework Node.js mais popular do mundo. Ele não substitui o <code>http</code> — ele <strong>simplifica</strong> o trabalho com ele.</p>
+      <p>Pensa assim: o módulo <code>http</code> é como construir uma casa com tijolos um por um. O Express é como usar peças de LEGO — muito mais rápido, organizado e divertido!</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👀 Compare: HTTP puro vs Express</div>
+      <p><strong>HTTP puro</strong> (já vimos isso):</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>❌ jeito difícil</span></div><div class="code-body"><code><span class="kw">const</span> <span class="var">http</span> = <span class="fn">require</span>(<span class="str">'http'</span>);
+<span class="kw">const</span> <span class="var">servidor</span> = http.<span class="met">createServer</span>((<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">if</span> (req.url === <span class="str">'/usuarios'</span> && req.method === <span class="str">'GET'</span>) {
+    res.<span class="met">writeHead</span>(<span class="num">200</span>, {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      <span class="str">'Access-Control-Allow-Origin'</span>: <span class="str">'*'</span>
+    });
+    res.<span class="met">end</span>(JSON.<span class="met">stringify</span>({ usuarios: [] }));
+  }
+  <span class="cmt">// e mais 40 linhas pra cada rota...</span>
+});
+servidor.<span class="met">listen</span>(<span class="num">3000</span>);</code></div></pre>
+
+      <p><strong>Express</strong> (muito melhor):</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>✅ jeito Express</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+app.<span class="met">get</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>({ usuarios: [] }); <span class="cmt">// já define Content-Type automaticamente!</span>
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>);</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✨ O que o Express faz por você</div>
+      <ul>
+        <li>Roteamento fácil: <code>app.get()</code>, <code>app.post()</code>, etc</li>
+        <li>Lê o corpo das requisições JSON automaticamente (com middleware)</li>
+        <li>Tem sistema de middleware plugável</li>
+        <li>Responde JSON, HTML, arquivos com métodos simples</li>
+        <li>Enorme ecossistema de plugins</li>
+      </ul>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🎯 Express na vida real</div>
+      <p>O Express é usado pelo <strong>Uber, IBM, Twitter</strong> e centenas de outras empresas. É como o "canivete suíço" do backend Node.js — não faz tudo, mas facilita demais as tarefas mais comuns.</p>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"express-instalando", icon:"⚙️", num:8,
+  badge:"Básico", badgeColor:"#3fb950",
+  title:"Instalando Express e Nodemon",
+  subtitle:"Configurando o ambiente de desenvolvimento",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">⚙️</span>
+      <p>Agora que você sabe por que usar o Express, vamos instalá-lo e criar nosso primeiro servidor de verdade!</p>
+      <p>Também vamos instalar o <em>nodemon</em> — uma ferramenta que <strong>reinicia o servidor automaticamente</strong> toda vez que você salvar o arquivo. Sem ele, você precisaria parar e reiniciar o servidor toda vez que mudar o código.</p>
+    </div>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="comment"># Instala o Express (vai pro projeto)</span>
+<span class="prompt">$</span> <span class="cmd">npm install express</span>
+
+<span class="comment"># Instala o nodemon (só pra desenvolvimento)</span>
+<span class="prompt">$</span> <span class="cmd">npm install -D nodemon</span>
+
+<span class="comment"># Resultado no package.json:</span>
+<span class="comment"># "dependencies": { "express": "^4.18.2" }</span>
+<span class="comment"># "devDependencies": { "nodemon": "^3.0.1" }</span>
+      </div>
+    </pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JSON</span><span>package.json — adicione os scripts</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code>{
+  <span class="str">"name"</span>: <span class="str">"meu-servidor"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"start"</span>: <span class="str">"node server.js"</span>,
+    <span class="str">"dev"</span>:   <span class="str">"nodemon server.js"</span>
+  },
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"express"</span>: <span class="str">"^4.18.2"</span>
+  },
+  <span class="str">"devDependencies"</span>: {
+    <span class="str">"nodemon"</span>: <span class="str">"^3.0.1"</span>
+  }
+}</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — seu primeiro Express!</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+<span class="kw">const</span> <span class="var">PORTA</span> = <span class="num">3000</span>;
+
+<span class="cmt">// Middleware: diz ao Express pra entender JSON no corpo das requisições</span>
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="cmt">// Rota raiz — acesse http://localhost:3000</span>
+app.<span class="met">get</span>(<span class="str">'/'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>({
+    mensagem: <span class="str">'Servidor funcionando! 🚀'</span>,
+    horario: <span class="kw">new</span> <span class="cls">Date</span>().<span class="met">toLocaleString</span>(<span class="str">'pt-BR'</span>)
+  });
+});
+
+<span class="cmt">// Inicia o servidor</span>
+app.<span class="met">listen</span>(<span class="var">PORTA</span>, () => {
+  console.<span class="met">log</span>(<span class="str">\`🚀 Servidor rodando em http://localhost:\${PORTA}\`</span>);
+});</code></div></pre>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">npm run dev</span>
+<span class="out">[nodemon] 3.0.1</span>
+<span class="out">[nodemon] watching: *.*</span>
+<span class="out">🚀 Servidor rodando em http://localhost:3000</span>
+<span class="comment"># Abra http://localhost:3000 no navegador!</span>
+<span class="comment"># Agora edite o server.js e salve — o nodemon reinicia sozinho</span>
+      </div>
+    </pre>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Exercício</div>
+      <ol>
+        <li>Crie o projeto, instale Express e nodemon</li>
+        <li>Crie o <code>server.js</code> acima e rode com <code>npm run dev</code></li>
+        <li>Acesse no navegador e veja o JSON de resposta</li>
+        <li>Adicione mais uma rota <code>/teste</code> que retorna seu nome e idade</li>
+        <li>Salve e veja o nodemon restartar automaticamente</li>
+      </ol>
+    </div>
+  `
+},
+
+// ─── MÓDULO 3 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 3 — Rotas e Requisições",
+  id:"rotas-get", icon:"📥", num:9,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"GET — buscando dados",
+  subtitle:"O método mais usado da web",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📥</span>
+      <p>Todo mundo já usou <strong>GET</strong> sem saber: quando você abre um site, o navegador faz um GET. É o método de "me dá essa informação".</p>
+      <p>GET <strong>nunca muda</strong> dados no servidor — ele só busca. Como folhar um cardápio: você olha, mas não pede nada ainda.</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — rotas GET</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="cmt">// Simulando um banco de dados (por enquanto só um array)</span>
+<span class="kw">const</span> <span class="var">usuarios</span> = [
+  { <span class="var">id</span>: <span class="num">1</span>, <span class="var">nome</span>: <span class="str">'Ana'</span>, <span class="var">email</span>: <span class="str">'ana@email.com'</span> },
+  { <span class="var">id</span>: <span class="num">2</span>, <span class="var">nome</span>: <span class="str">'Bruno'</span>, <span class="var">email</span>: <span class="str">'bruno@email.com'</span> },
+  { <span class="var">id</span>: <span class="num">3</span>, <span class="var">nome</span>: <span class="str">'Carla'</span>, <span class="var">email</span>: <span class="str">'carla@email.com'</span> }
+];
+
+<span class="cmt">// GET /usuarios — retorna todos os usuários</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>({
+    <span class="var">total</span>: usuarios.length,
+    <span class="var">dados</span>: usuarios
+  });
+});
+
+<span class="cmt">// GET /usuarios/:id — retorna UM usuário pelo id</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="cls">Number</span>(req.params.id); <span class="cmt">// :id vira req.params.id</span>
+  <span class="kw">const</span> <span class="var">usuario</span> = usuarios.<span class="met">find</span>(<span class="var">u</span> => u.id === id);
+
+  <span class="kw">if</span> (!usuario) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Usuário não encontrado'</span> });
+  }
+
+  res.<span class="met">json</span>(usuario);
+});
+
+<span class="cmt">// GET /buscar?nome=Ana — busca por query string</span>
+app.<span class="met">get</span>(<span class="str">'/buscar'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">nome</span> } = req.query; <span class="cmt">// ?nome=Ana vira req.query.nome</span>
+
+  <span class="kw">if</span> (!nome) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Informe o parâmetro nome'</span> });
+  }
+
+  <span class="kw">const</span> <span class="var">resultados</span> = usuarios.<span class="met">filter</span>(<span class="var">u</span> =>
+    u.nome.<span class="met">toLowerCase</span>().<span class="met">includes</span>(nome.<span class="met">toLowerCase</span>())
+  );
+
+  res.<span class="met">json</span>(resultados);
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>, () => console.<span class="met">log</span>(<span class="str">'Rodando na porta 3000'</span>));</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🧪 Testando as rotas</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>URL</th><th>O que retorna</th></tr>
+          <tr><td><code>GET /usuarios</code></td><td>Lista todos</td></tr>
+          <tr><td><code>GET /usuarios/1</code></td><td>Só o usuário com id 1</td></tr>
+          <tr><td><code>GET /usuarios/99</code></td><td>Erro 404 — não existe</td></tr>
+          <tr><td><code>GET /buscar?nome=ana</code></td><td>Usuários com "ana" no nome</td></tr>
+        </table>
+      </div>
+      <div class="tip" style="margin-top:12px">
+        <span class="tip-icon">💡</span>
+        <div>Use a extensão <strong>Thunder Client</strong> no VS Code ou o app <strong>Insomnia</strong> para testar suas rotas facilmente!</div>
+      </div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"rotas-post", icon:"📤", num:10,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"POST — enviando dados",
+  subtitle:"Criando novos registros no servidor",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📤</span>
+      <p><strong>POST</strong> é usado pra <em>criar coisas novas</em> — cadastrar um usuário, publicar um post, enviar um formulário.</p>
+      <p>Ao contrário do GET (que usa a URL), o POST <strong>envia os dados no corpo da requisição</strong> (body). Isso é mais seguro e permite enviar muito mais informação.</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — rota POST</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+app.<span class="met">use</span>(express.<span class="met">json</span>()); <span class="cmt">// SEM ISSO, req.body é undefined!</span>
+
+<span class="kw">let</span> <span class="var">usuarios</span> = [
+  { <span class="var">id</span>: <span class="num">1</span>, <span class="var">nome</span>: <span class="str">'Ana'</span>, <span class="var">email</span>: <span class="str">'ana@email.com'</span> }
+];
+<span class="kw">let</span> <span class="var">proximoId</span> = <span class="num">2</span>;
+
+<span class="cmt">// POST /usuarios — cria um novo usuário</span>
+app.<span class="met">post</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span> } = req.body; <span class="cmt">// dados vêm do corpo da requisição</span>
+
+  <span class="cmt">// Validação — nunca confie nos dados do cliente!</span>
+  <span class="kw">if</span> (!nome || !email) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({
+      <span class="var">erro</span>: <span class="str">'Nome e email são obrigatórios'</span>
+    });
+  }
+
+  <span class="cmt">// Verifica se email já existe</span>
+  <span class="kw">const</span> <span class="var">existe</span> = usuarios.<span class="met">find</span>(<span class="var">u</span> => u.email === email);
+  <span class="kw">if</span> (existe) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">409</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email já cadastrado'</span> });
+  }
+
+  <span class="cmt">// Cria o novo usuário</span>
+  <span class="kw">const</span> <span class="var">novoUsuario</span> = {
+    <span class="var">id</span>: proximoId++,
+    <span class="var">nome</span>,
+    <span class="var">email</span>,
+    <span class="var">criadoEm</span>: <span class="kw">new</span> <span class="cls">Date</span>().<span class="met">toISOString</span>()
+  };
+
+  usuarios.<span class="met">push</span>(novoUsuario);
+
+  <span class="cmt">// 201 = Created (convenção pra POST que criou algo)</span>
+  res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>({
+    <span class="var">mensagem</span>: <span class="str">'Usuário criado com sucesso!'</span>,
+    <span class="var">usuario</span>: novoUsuario
+  });
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>);</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🧪 Como testar um POST</div>
+      <p>No Thunder Client ou Insomnia:</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JSON</span><span>Corpo da requisição (Body → JSON)</span></div><div class="code-body"><code>{
+  <span class="str">"nome"</span>: <span class="str">"João"</span>,
+  <span class="str">"email"</span>: <span class="str">"joao@email.com"</span>
+}</code></div></pre>
+      <p>Resposta esperada:</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JSON</span><span>Resposta 201</span></div><div class="code-body"><code>{
+  <span class="str">"mensagem"</span>: <span class="str">"Usuário criado com sucesso!"</span>,
+  <span class="str">"usuario"</span>: {
+    <span class="str">"id"</span>: <span class="num">2</span>,
+    <span class="str">"nome"</span>: <span class="str">"João"</span>,
+    <span class="str">"email"</span>: <span class="str">"joao@email.com"</span>,
+    <span class="str">"criadoEm"</span>: <span class="str">"2024-01-15T10:30:00.000Z"</span>
+  }
+}</code></div></pre>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"rotas-put-delete", icon:"🔄", num:11,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"PUT e DELETE — atualizar e remover",
+  subtitle:"O CRUD completo no Express",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔄</span>
+      <p>Com GET e POST você já consegue buscar e criar. Mas e pra <em>editar</em> ou <em>apagar</em>? Para isso existem o <strong>PUT</strong> (ou PATCH) e o <strong>DELETE</strong>.</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🎯 O CRUD — o coração de qualquer sistema</div>
+      <p><strong>C</strong>reate → POST &nbsp;|&nbsp; <strong>R</strong>ead → GET &nbsp;|&nbsp; <strong>U</strong>pdate → PUT/PATCH &nbsp;|&nbsp; <strong>D</strong>elete → DELETE</p>
+      <p>Praticamente todo sistema (rede social, e-commerce, app de tarefas) é basicamente CRUD!</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — PUT e DELETE</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// PUT /usuarios/:id — SUBSTITUI o usuário inteiro</span>
+app.<span class="met">put</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="cls">Number</span>(req.params.id);
+  <span class="kw">const</span> <span class="var">index</span> = usuarios.<span class="met">findIndex</span>(<span class="var">u</span> => u.id === id);
+
+  <span class="kw">if</span> (index === <span class="op">-</span><span class="num">1</span>) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Usuário não encontrado'</span> });
+  }
+
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span> } = req.body;
+  <span class="kw">if</span> (!nome || !email) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Nome e email obrigatórios'</span> });
+  }
+
+  <span class="cmt">// Substitui mantendo o id original</span>
+  usuarios[index] = { <span class="var">id</span>, <span class="var">nome</span>, <span class="var">email</span> };
+
+  res.<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Usuário atualizado!'</span>, <span class="var">usuario</span>: usuarios[index] });
+});
+
+<span class="cmt">// PATCH /usuarios/:id — atualiza SÓ os campos enviados</span>
+app.<span class="met">patch</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="cls">Number</span>(req.params.id);
+  <span class="kw">const</span> <span class="var">usuario</span> = usuarios.<span class="met">find</span>(<span class="var">u</span> => u.id === id);
+
+  <span class="kw">if</span> (!usuario) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+  }
+
+  <span class="cmt">// Spread: mantém o que já tinha, sobrescreve só o que veio</span>
+  <span class="kw">const</span> <span class="var">atualizado</span> = { ...usuario, ...req.body };
+  <span class="kw">const</span> <span class="var">index</span> = usuarios.<span class="met">indexOf</span>(usuario);
+  usuarios[index] = atualizado;
+
+  res.<span class="met">json</span>(atualizado);
+});
+
+<span class="cmt">// DELETE /usuarios/:id — remove o usuário</span>
+app.<span class="met">delete</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="cls">Number</span>(req.params.id);
+  <span class="kw">const</span> <span class="var">index</span> = usuarios.<span class="met">findIndex</span>(<span class="var">u</span> => u.id === id);
+
+  <span class="kw">if</span> (index === <span class="op">-</span><span class="num">1</span>) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+  }
+
+  <span class="kw">const</span> <span class="var">removido</span> = usuarios.<span class="met">splice</span>(index, <span class="num">1</span>)[<span class="num">0</span>]; <span class="cmt">// remove e guarda</span>
+
+  res.<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">\`Usuário \${removido.nome} removido!\`</span> });
+});</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🔄 PUT vs PATCH — qual usar?</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Método</th><th>Comportamento</th><th>Exemplo</th></tr>
+          <tr><td><code>PUT</code></td><td>Substitui o recurso <em>inteiro</em></td><td>Você envia todos os campos, mesmo os que não mudaram</td></tr>
+          <tr><td><code>PATCH</code></td><td>Atualiza <em>só o que foi enviado</em></td><td>Envia só <code>{"nome":"Novo Nome"}</code> e o email fica igual</td></tr>
+        </table>
+      </div>
+      <p>Na prática, muitas APIs usam só o PUT por simplicidade. PATCH é mais semântico e eficiente.</p>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Exercício CRUD completo</div>
+      <p>Monte um servidor com todas as 5 rotas para uma lista de <strong>produtos</strong>:</p>
+      <ol>
+        <li><code>GET /produtos</code> — lista todos</li>
+        <li><code>GET /produtos/:id</code> — busca por id</li>
+        <li><code>POST /produtos</code> — cria (nome, preco, estoque)</li>
+        <li><code>PUT /produtos/:id</code> — atualiza tudo</li>
+        <li><code>DELETE /produtos/:id</code> — remove</li>
+      </ol>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"middlewares", icon:"🚦", num:12,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"Middlewares — as cancelas da estrada",
+  subtitle:"Código que roda antes das suas rotas",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🚦</span>
+      <p>Imagina uma <strong>cancela de pedágio</strong>. Todo carro que vai passar pela estrada <em>precisa passar pela cancela primeiro</em> — pagar, mostrar documentos, etc.</p>
+      <p>Um <em>middleware</em> é exatamente isso: um código que roda <strong>no meio</strong> da requisição e a resposta — antes de chegar na sua rota final.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 Fluxo com middlewares</div>
+      <div class="diagram">
+  Requisição ──► <span class="hl">Middleware 1</span> ──► <span class="hl2">Middleware 2</span> ──► <span class="hl3">Rota Final</span> ──► Resposta
+                  (log)           (auth)          (GET /dados)
+
+  next() passa pro próximo   ◄──── se não chamar next(), para aqui!
+      </div>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — middlewares</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="cmt">// ── Middleware GLOBAL: roda em TODAS as requisições ──</span>
+app.<span class="met">use</span>((<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) => {
+  <span class="kw">const</span> <span class="var">horario</span> = <span class="kw">new</span> <span class="cls">Date</span>().<span class="met">toLocaleTimeString</span>(<span class="str">'pt-BR'</span>);
+  console.<span class="met">log</span>(<span class="str">\`[\${horario}] \${req.method} \${req.url}\`</span>);
+  <span class="fn">next</span>(); <span class="cmt">// IMPORTANTE: chama o próximo middleware/rota</span>
+});
+
+<span class="cmt">// ── Middleware de AUTENTICAÇÃO: roda em rotas específicas ──</span>
+<span class="kw">function</span> <span class="fn">verificarToken</span>(<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) {
+  <span class="kw">const</span> <span class="var">token</span> = req.headers[<span class="str">'authorization'</span>];
+
+  <span class="kw">if</span> (!token) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">401</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Token não fornecido'</span> });
+  }
+
+  <span class="kw">if</span> (token !== <span class="str">'Bearer meu-token-secreto'</span>) {
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">403</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Token inválido'</span> });
+  }
+
+  <span class="fn">next</span>(); <span class="cmt">// token válido: continua pra rota</span>
+}
+
+<span class="cmt">// Rota pública — qualquer um acessa</span>
+app.<span class="met">get</span>(<span class="str">'/publico'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>({ <span class="var">msg</span>: <span class="str">'Todo mundo vê isso!'</span> });
+});
+
+<span class="cmt">// Rota privada — PRECISA do token (middleware aplicado só aqui)</span>
+app.<span class="met">get</span>(<span class="str">'/privado'</span>, <span class="fn">verificarToken</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>({ <span class="var">msg</span>: <span class="str">'Você está autenticado! 🔐'</span> });
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>);</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">📦 Middlewares populares do npm</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Pacote</th><th>Instalar</th><th>Para que serve</th></tr>
+          <tr><td><code>cors</code></td><td><code>npm i cors</code></td><td>Permite chamadas do frontend (próxima lição!)</td></tr>
+          <tr><td><code>helmet</code></td><td><code>npm i helmet</code></td><td>Adiciona headers de segurança</td></tr>
+          <tr><td><code>morgan</code></td><td><code>npm i morgan</code></td><td>Log bonito de requisições</td></tr>
+          <tr><td><code>express-rate-limit</code></td><td><code>npm i express-rate-limit</code></td><td>Limita quantidade de requisições</td></tr>
+        </table>
+      </div>
+    </div>
+  `
+},
+
+// ─── MÓDULO 4 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 4 — Frontend + Backend",
+  id:"fetch-backend", icon:"🔗", num:13,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"Conectando Frontend ao Backend",
+  subtitle:"fetch() do navegador chamando sua API",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔗</span>
+      <p>Agora vem a parte mais emocionante: fazer o <strong>HTML/JavaScript do navegador</strong> conversar com o <strong>servidor Node.js</strong>.</p>
+      <p>É aqui que "mágica acontece" — um botão clicado na tela chama seu servidor e atualiza a página sem recarregar!</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🖥️ server.js — backend preparado</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">cors</span> = <span class="fn">require</span>(<span class="str">'cors'</span>);   <span class="cmt">// npm install cors</span>
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+app.<span class="met">use</span>(<span class="fn">cors</span>());             <span class="cmt">// permite chamadas do frontend</span>
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="kw">let</span> <span class="var">tarefas</span> = [
+  { <span class="var">id</span>: <span class="num">1</span>, <span class="var">texto</span>: <span class="str">'Aprender Node.js'</span>, <span class="var">feita</span>: <span class="kw">false</span> }
+];
+<span class="kw">let</span> <span class="var">nextId</span> = <span class="num">2</span>;
+
+app.<span class="met">get</span>(<span class="str">'/tarefas'</span>, (<span class="var">req</span>, <span class="var">res</span>) => res.<span class="met">json</span>(tarefas));
+
+app.<span class="met">post</span>(<span class="str">'/tarefas'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">texto</span> } = req.body;
+  <span class="kw">if</span> (!texto) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Texto obrigatório'</span> });
+  <span class="kw">const</span> <span class="var">nova</span> = { <span class="var">id</span>: nextId++, <span class="var">texto</span>, <span class="var">feita</span>: <span class="kw">false</span> };
+  tarefas.<span class="met">push</span>(nova);
+  res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>(nova);
+});
+
+app.<span class="met">delete</span>(<span class="str">'/tarefas/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="cls">Number</span>(req.params.id);
+  tarefas = tarefas.<span class="met">filter</span>(<span class="var">t</span> => t.id !== id);
+  res.<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Removida!'</span> });
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>, () => console.<span class="met">log</span>(<span class="str">'API em http://localhost:3000'</span>));</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌐 index.html — frontend chamando a API</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">HTML</span><span>index.html (abra direto no navegador)</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="atr">lang</span>=<span class="val">"pt-BR"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="atr">charset</span>=<span class="val">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Lista de Tarefas<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Minhas Tarefas<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;input</span> <span class="atr">id</span>=<span class="val">"nova"</span> <span class="atr">placeholder</span>=<span class="val">"Nova tarefa..."</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="atr">onclick</span>=<span class="val">"adicionar()"</span><span class="tag">&gt;</span>Adicionar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;ul</span> <span class="atr">id</span>=<span class="val">"lista"</span><span class="tag">&gt;&lt;/ul&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+  <span class="kw">const</span> <span class="var">API</span> = <span class="str">'http://localhost:3000'</span>;
+
+  <span class="kw">async function</span> <span class="fn">carregarTarefas</span>() {
+    <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">\`\${API}/tarefas\`</span>);
+    <span class="kw">const</span> <span class="var">tarefas</span> = <span class="kw">await</span> res.<span class="met">json</span>();
+
+    <span class="kw">const</span> <span class="var">lista</span> = document.<span class="met">getElementById</span>(<span class="str">'lista'</span>);
+    lista.innerHTML = tarefas.<span class="met">map</span>(<span class="var">t</span> => <span class="str">\`
+      &lt;li&gt;
+        \${t.texto}
+        &lt;button onclick="remover(\${t.id})"&gt;✕&lt;/button&gt;
+      &lt;/li&gt;
+    \`</span>).<span class="met">join</span>(<span class="str">''</span>);
+  }
+
+  <span class="kw">async function</span> <span class="fn">adicionar</span>() {
+    <span class="kw">const</span> <span class="var">input</span> = document.<span class="met">getElementById</span>(<span class="str">'nova'</span>);
+    <span class="kw">const</span> <span class="var">texto</span> = input.value.<span class="met">trim</span>();
+    <span class="kw">if</span> (!texto) <span class="kw">return</span>;
+
+    <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">\`\${API}/tarefas\`</span>, {
+      <span class="var">method</span>: <span class="str">'POST'</span>,
+      <span class="var">headers</span>: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+      <span class="var">body</span>: JSON.<span class="met">stringify</span>({ texto })
+    });
+
+    input.value = <span class="str">''</span>;
+    <span class="fn">carregarTarefas</span>(); <span class="cmt">// atualiza a lista</span>
+  }
+
+  <span class="kw">async function</span> <span class="fn">remover</span>(<span class="var">id</span>) {
+    <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">\`\${API}/tarefas/\${id}\`</span>, { <span class="var">method</span>: <span class="str">'DELETE'</span> });
+    <span class="fn">carregarTarefas</span>();
+  }
+
+  <span class="fn">carregarTarefas</span>(); <span class="cmt">// carrega ao abrir a página</span>
+<span class="tag">&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></code></div></pre>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"cors", icon:"🛡️", num:14,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"CORS — por que o navegador bloqueia?",
+  subtitle:"Cross-Origin Resource Sharing explicado simples",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🛡️</span>
+      <p>Você já tentou fazer um <code>fetch</code> de um domínio diferente e viu um erro vermelho no console? Isso é o <em>CORS</em> bloqueando!</p>
+      <p>Mas <strong>por que</strong> o navegador faz isso? É uma proteção de segurança!</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🏦 Analogia: o banco</div>
+      <p>Imagina que o seu servidor é um banco. Por padrão, só quem está dentro do banco pode mexer nas contas. Se alguém de fora (outro domínio) tentar acessar, o segurança (CORS) barra.</p>
+      <p>Mas se o <em>gerente do banco</em> (você, no servidor) quiser permitir que clientes de fora entrem, ele pode configurar isso!</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — configurando CORS</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">cors</span> = <span class="fn">require</span>(<span class="str">'cors'</span>); <span class="cmt">// npm install cors</span>
+
+<span class="cmt">// ✅ Opção 1: Permite TUDO (ok pra desenvolvimento, cuidado em produção!)</span>
+app.<span class="met">use</span>(<span class="fn">cors</span>());
+
+<span class="cmt">// ✅ Opção 2: Permite só origens específicas (RECOMENDADO em produção)</span>
+app.<span class="met">use</span>(<span class="fn">cors</span>({
+  <span class="var">origin</span>: [
+    <span class="str">'http://localhost:5500'</span>,      <span class="cmt">// VS Code Live Server</span>
+    <span class="str">'https://meusite.com.br'</span>,     <span class="cmt">// produção</span>
+    <span class="str">'https://www.meusite.com.br'</span>  <span class="cmt">// com www</span>
+  ],
+  <span class="var">methods</span>: [<span class="str">'GET'</span>, <span class="str">'POST'</span>, <span class="str">'PUT'</span>, <span class="str">'DELETE'</span>],
+  <span class="var">allowedHeaders</span>: [<span class="str">'Content-Type'</span>, <span class="str">'Authorization'</span>]
+}));
+
+<span class="cmt">// ✅ Opção 3: CORS dinâmico — decide por requisição</span>
+app.<span class="met">use</span>(<span class="fn">cors</span>({
+  <span class="var">origin</span>: (<span class="var">origin</span>, <span class="var">callback</span>) => {
+    <span class="kw">const</span> <span class="var">permitidos</span> = [<span class="str">'http://localhost:5500'</span>, <span class="str">'https://meusite.com'</span>];
+    <span class="kw">if</span> (!origin || permitidos.<span class="met">includes</span>(origin)) {
+      <span class="fn">callback</span>(<span class="kw">null</span>, <span class="kw">true</span>);  <span class="cmt">// permite</span>
+    } <span class="kw">else</span> {
+      <span class="fn">callback</span>(<span class="kw">new</span> <span class="cls">Error</span>(<span class="str">'CORS bloqueado'</span>));
+    }
+  }
+}));</code></div></pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>Preflight request:</strong> Para requisições POST/PUT com JSON, o navegador primeiro manda um OPTIONS perguntando se pode. O CORS precisa responder a esse OPTIONS também. O pacote <code>cors</code> faz isso automaticamente!</div>
+    </div>
+  `
+},
+
+// ─── MÓDULO 5 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 5 — SQL e Banco de Dados",
+  id:"sql-intro", icon:"🗄️", num:15,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"O que é SQL?",
+  subtitle:"A linguagem que fala com bancos de dados",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🗄️</span>
+      <p>Até agora guardamos dados em arrays no Node.js. Mas quando o servidor reinicia, <strong>tudo se perde</strong>! Para guardar dados de verdade, precisamos de um <em>banco de dados</em>.</p>
+      <p><em>SQL</em> (Structured Query Language) é a <strong>linguagem usada pra falar com bancos de dados</strong>. É quase uma língua humana!</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">📊 Analogia: banco de dados = planilha turbinada</div>
+      <p>Um banco de dados relacional é como uma <strong>planilha do Excel</strong>, só que muito mais poderosa:</p>
+      <ul>
+        <li><strong>Tabela</strong> = uma aba da planilha</li>
+        <li><strong>Coluna</strong> = o cabeçalho (nome, email, data)</li>
+        <li><strong>Linha</strong> = um registro (cada usuário)</li>
+        <li><strong>SQL</strong> = as fórmulas pra consultar e manipular</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗂️ Bancos SQL mais populares</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Banco</th><th>Onde usar</th><th>Características</th></tr>
+          <tr><td><strong>SQLite</strong></td><td>Pequenos projetos, desenvolvimento</td><td>Um arquivo só, zero configuração, ótimo pra aprender</td></tr>
+          <tr><td><strong>MySQL</strong></td><td>Sites, e-commerce</td><td>Muito popular, fácil de hospedar</td></tr>
+          <tr><td><strong>PostgreSQL</strong></td><td>Sistemas complexos</td><td>Mais poderoso, open source, preferido em produção</td></tr>
+          <tr><td><strong>SQL Server</strong></td><td>Empresas, .NET</td><td>Da Microsoft, usado em ambientes corporativos</td></tr>
+        </table>
+      </div>
+      <div class="tip" style="margin-top:12px">
+        <span class="tip-icon">💡</span>
+        <div>Vamos aprender com <strong>SQLite</strong> — a sintaxe SQL é praticamente idêntica em todos, então o que você aprender aqui funciona no MySQL e PostgreSQL!</div>
+      </div>
+    </div>
+
+    <div class="diagram">
+<span class="hl">Estrutura de um banco relacional:</span>
+
+  Banco: <span class="hl2">loja_online</span>
+  │
+  ├── Tabela: <span class="hl3">usuarios</span>
+  │     id │ nome     │ email           │ criado_em
+  │   ─────┼──────────┼─────────────────┼────────────
+  │      1 │ Ana      │ ana@email.com   │ 2024-01-10
+  │      2 │ Bruno    │ bruno@email.com │ 2024-01-11
+  │
+  └── Tabela: <span class="hl4">pedidos</span>
+        id │ usuario_id │ produto    │ valor
+      ─────┼────────────┼────────────┼──────
+         1 │      1     │ Camiseta   │ 49.90
+         2 │      1     │ Tênis      │ 199.00  ← Ana comprou 2 coisas
+         3 │      2     │ Boné       │ 39.90
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"sql-create-insert", icon:"📝", num:16,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"CREATE TABLE e INSERT",
+  subtitle:"Criando tabelas e inserindo dados",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📝</span>
+      <p>Vamos aprender as primeiras instruções SQL! São muito parecidas com frases em inglês — você vai ver que é bem intuitivo.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏗️ CREATE TABLE — criando uma tabela</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>criando a tabela usuarios</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- CREATE TABLE = "crie uma tabela chamada..."</span>
+<span class="kw">CREATE TABLE</span> usuarios (
+  id        <span class="cls">INTEGER</span> <span class="kw">PRIMARY KEY AUTOINCREMENT</span>,  <span class="cmt">-- número único automático</span>
+  nome      <span class="cls">TEXT</span>    <span class="kw">NOT NULL</span>,                    <span class="cmt">-- texto, obrigatório</span>
+  email     <span class="cls">TEXT</span>    <span class="kw">NOT NULL UNIQUE</span>,             <span class="cmt">-- único no banco</span>
+  senha     <span class="cls">TEXT</span>    <span class="kw">NOT NULL</span>,
+  criado_em <span class="cls">TEXT</span>    <span class="kw">DEFAULT</span> (<span class="fn">datetime</span>(<span class="str">'now'</span>))   <span class="cmt">-- data automática</span>
+);
+
+<span class="cmt">-- Tabela de produtos</span>
+<span class="kw">CREATE TABLE</span> produtos (
+  id       <span class="cls">INTEGER</span> <span class="kw">PRIMARY KEY AUTOINCREMENT</span>,
+  nome     <span class="cls">TEXT</span>    <span class="kw">NOT NULL</span>,
+  preco    <span class="cls">REAL</span>    <span class="kw">NOT NULL</span>,           <span class="cmt">-- número com decimal</span>
+  estoque  <span class="cls">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+  ativo    <span class="cls">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">1</span>           <span class="cmt">-- 1 = true, 0 = false no SQLite</span>
+);</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📌 Tipos de dados SQL</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Tipo</th><th>Para que serve</th><th>Exemplo</th></tr>
+          <tr><td><code>INTEGER</code></td><td>Números inteiros</td><td>id, quantidade, ano</td></tr>
+          <tr><td><code>REAL</code></td><td>Números decimais</td><td>preço, peso, nota</td></tr>
+          <tr><td><code>TEXT</code></td><td>Texto de qualquer tamanho</td><td>nome, email, descrição</td></tr>
+          <tr><td><code>BLOB</code></td><td>Dados binários</td><td>imagens (raro)</td></tr>
+          <tr><td><code>NULL</code></td><td>Valor vazio/ausente</td><td>campo não preenchido</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ INSERT — inserindo dados</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>inserindo registros</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- INSERT INTO tabela (colunas) VALUES (valores)</span>
+<span class="kw">INSERT INTO</span> usuarios (nome, email, senha)
+<span class="kw">VALUES</span> (<span class="str">'Ana'</span>, <span class="str">'ana@email.com'</span>, <span class="str">'senha123'</span>);
+
+<span class="cmt">-- Inserindo múltiplos de uma vez</span>
+<span class="kw">INSERT INTO</span> produtos (nome, preco, estoque)
+<span class="kw">VALUES</span>
+  (<span class="str">'Camiseta'</span>, <span class="num">49.90</span>, <span class="num">100</span>),
+  (<span class="str">'Tênis'</span>,    <span class="num">199.00</span>, <span class="num">50</span>),
+  (<span class="str">'Boné'</span>,     <span class="num">39.90</span>, <span class="num">200</span>);</code></div></pre>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"sql-select", icon:"🔍", num:17,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"SELECT — buscando dados",
+  subtitle:"A instrução mais importante do SQL",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔍</span>
+      <p>O <code>SELECT</code> é com certeza o comando SQL mais usado. Ele busca dados da tabela — e tem <strong>muitas opções</strong> pra filtrar, ordenar e agrupar resultados.</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>SELECT — do básico ao avançado</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- Buscar TUDO de uma tabela</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> usuarios;
+
+<span class="cmt">-- Buscar só algumas colunas</span>
+<span class="kw">SELECT</span> id, nome, email <span class="kw">FROM</span> usuarios;
+
+<span class="cmt">-- WHERE = "onde essa condição for verdade"</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> usuarios <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> usuarios <span class="kw">WHERE</span> nome = <span class="str">'Ana'</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produtos  <span class="kw">WHERE</span> preco < <span class="num">100</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produtos  <span class="kw">WHERE</span> preco <span class="kw">BETWEEN</span> <span class="num">50</span> <span class="kw">AND</span> <span class="num">200</span>;
+
+<span class="cmt">-- LIKE = busca parcial (% = qualquer coisa)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> usuarios <span class="kw">WHERE</span> nome <span class="kw">LIKE</span> <span class="str">'An%'</span>;     <span class="cmt">-- começa com "An"</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> usuarios <span class="kw">WHERE</span> email <span class="kw">LIKE</span> <span class="str">'%@gmail%'</span>; <span class="cmt">-- tem @gmail</span>
+
+<span class="cmt">-- ORDER BY = ordenar</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produtos <span class="kw">ORDER BY</span> preco <span class="kw">ASC</span>;   <span class="cmt">-- crescente</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produtos <span class="kw">ORDER BY</span> preco <span class="kw">DESC</span>;  <span class="cmt">-- decrescente</span>
+
+<span class="cmt">-- LIMIT = limitar resultados</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produtos <span class="kw">ORDER BY</span> preco <span class="kw">DESC LIMIT</span> <span class="num">3</span>; <span class="cmt">-- top 3 mais caros</span>
+
+<span class="cmt">-- COUNT, SUM, AVG = funções de agregação</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total   <span class="kw">FROM</span> usuarios;
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(preco) <span class="kw">AS</span> soma  <span class="kw">FROM</span> produtos;
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(preco) <span class="kw">AS</span> media <span class="kw">FROM</span> produtos;
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(preco), <span class="fn">MAX</span>(preco) <span class="kw">FROM</span> produtos;</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🔗 JOIN — juntando tabelas</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>JOIN — busca em múltiplas tabelas</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- Busca pedidos COM o nome do usuário</span>
+<span class="cmt">-- (pedidos.usuario_id = usuarios.id)</span>
+<span class="kw">SELECT</span>
+  pedidos.id,
+  usuarios.nome  <span class="kw">AS</span> cliente,
+  pedidos.produto,
+  pedidos.valor
+<span class="kw">FROM</span> pedidos
+<span class="kw">INNER JOIN</span> usuarios <span class="kw">ON</span> pedidos.usuario_id = usuarios.id;
+
+<span class="cmt">-- Resultado:</span>
+<span class="cmt">-- id │ cliente │ produto   │ valor</span>
+<span class="cmt">-- ───┼─────────┼───────────┼──────</span>
+<span class="cmt">--  1 │ Ana     │ Camiseta  │ 49.90</span>
+<span class="cmt">--  2 │ Ana     │ Tênis     │ 199.00</span>
+<span class="cmt">--  3 │ Bruno   │ Boné      │ 39.90</span></code></div></pre>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"sql-update-delete", icon:"✏️", num:18,
+  badge:"Intermediário", badgeColor:"#f0883e",
+  title:"UPDATE e DELETE no SQL",
+  subtitle:"Atualizando e removendo registros",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">✏️</span>
+      <p>Com <code>CREATE</code>, <code>INSERT</code> e <code>SELECT</code> você já cobre boa parte do que precisa. Agora vamos aprender a <em>atualizar</em> e <em>remover</em> registros.</p>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>UPDATE — atualizando dados</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- Atualiza o email da Ana (id = 1)</span>
+<span class="kw">UPDATE</span> usuarios
+<span class="kw">SET</span>   email = <span class="str">'ana.nova@email.com'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cmt">-- Atualiza vários campos de uma vez</span>
+<span class="kw">UPDATE</span> produtos
+<span class="kw">SET</span>   preco = <span class="num">59.90</span>,
+      estoque = estoque - <span class="num">1</span>    <span class="cmt">-- diminui o estoque em 1</span>
+<span class="kw">WHERE</span> id = <span class="num">3</span>;
+
+<span class="cmt">-- Atualiza TODOS os produtos com desconto de 10%</span>
+<span class="kw">UPDATE</span> produtos
+<span class="kw">SET</span>   preco = preco * <span class="num">0.9</span>
+<span class="kw">WHERE</span> ativo = <span class="num">1</span>;</code></div></pre>
+
+    <div class="warning">
+      <span class="warn-icon">⚠️</span>
+      <div><strong>SEMPRE use WHERE no UPDATE e DELETE!</strong> Se você esquecer o <code>WHERE</code>, vai atualizar ou deletar <em>TODOS</em> os registros da tabela. Isso é irreversível!</div>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">SQL</span><span>DELETE — removendo dados</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">-- Remove um usuário pelo id</span>
+<span class="kw">DELETE FROM</span> usuarios <span class="kw">WHERE</span> id = <span class="num">5</span>;
+
+<span class="cmt">-- Remove todos os produtos com estoque zerado</span>
+<span class="kw">DELETE FROM</span> produtos <span class="kw">WHERE</span> estoque = <span class="num">0</span>;
+
+<span class="cmt">-- ⚠️ CUIDADO: isso deleta TUDO da tabela!</span>
+<span class="cmt">-- DELETE FROM usuarios;</span>
+
+<span class="cmt">-- Soft delete: melhor prática! Não apaga, só "desativa"</span>
+<span class="kw">UPDATE</span> usuarios <span class="kw">SET</span> ativo = <span class="num">0</span> <span class="kw">WHERE</span> id = <span class="num">5</span>;
+<span class="cmt">-- Aí no SELECT você filtra: WHERE ativo = 1</span></code></div></pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>Soft Delete</strong> é uma técnica onde você não deleta fisicamente o registro — você apenas marca como "inativo" com uma coluna <code>deletado_em</code> ou <code>ativo = 0</code>. Assim você pode recuperar dados excluídos por engano e manter histórico!</div>
+    </div>
+  `
+},
+
+// ─── MÓDULO 6 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 6 — Node + Banco de Dados",
+  id:"sqlite-node", icon:"🔌", num:19,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"SQLite no Node.js",
+  subtitle:"Conectando o servidor ao banco de dados",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔌</span>
+      <p>Agora vamos juntar tudo! Vamos usar o <strong>SQLite</strong> com o pacote <em>better-sqlite3</em> — é o mais simples de configurar e ideal para aprender.</p>
+      <p>O SQLite guarda todo o banco num <strong>único arquivo</strong> (<code>.db</code>) na sua pasta. Zero instalação de servidor de banco!</p>
+    </div>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">npm install better-sqlite3</span>
+<span class="out">added 1 package in 2s</span>
+      </div>
+    </pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>database.js — configuração do banco</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="cls">Database</span> = <span class="fn">require</span>(<span class="str">'better-sqlite3'</span>);
+
+<span class="cmt">// Abre (ou cria se não existir) o arquivo do banco</span>
+<span class="kw">const</span> <span class="var">db</span> = <span class="kw">new</span> <span class="cls">Database</span>(<span class="str">'dados.db'</span>);
+
+<span class="cmt">// Configuração importante: ativa chaves estrangeiras</span>
+db.<span class="met">pragma</span>(<span class="str">'journal_mode = WAL'</span>);  <span class="cmt">// melhor performance</span>
+db.<span class="met">pragma</span>(<span class="str">'foreign_keys = ON'</span>);  <span class="cmt">// ativa relacionamentos</span>
+
+<span class="cmt">// Cria a tabela se ela não existir</span>
+db.<span class="met">exec</span>(<span class="str">\`
+  CREATE TABLE IF NOT EXISTS usuarios (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome      TEXT    NOT NULL,
+    email     TEXT    NOT NULL UNIQUE,
+    criado_em TEXT    DEFAULT (datetime('now', 'localtime'))
+  );
+
+  CREATE TABLE IF NOT EXISTS tarefas (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id  INTEGER NOT NULL,
+    texto       TEXT    NOT NULL,
+    feita       INTEGER DEFAULT 0,
+    criado_em   TEXT    DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+  );
+\`</span>);
+
+console.<span class="met">log</span>(<span class="str">'✅ Banco de dados pronto!'</span>);
+
+<span class="kw">module</span>.exports = db; <span class="cmt">// exporta pra usar em outros arquivos</span></code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — usando o banco</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">cors</span> = <span class="fn">require</span>(<span class="str">'cors'</span>);
+<span class="kw">const</span> <span class="var">db</span> = <span class="fn">require</span>(<span class="str">'./database'</span>); <span class="cmt">// importa a conexão</span>
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+app.<span class="met">use</span>(<span class="fn">cors</span>());
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="cmt">// ── Listar todos os usuários ──</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">usuarios</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios'</span>).<span class="met">all</span>();
+  res.<span class="met">json</span>(usuarios);
+});
+
+<span class="cmt">// ── Buscar um usuário ──</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">usuario</span> = db
+    .<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE id = ?'</span>)
+    .<span class="met">get</span>(req.params.id); <span class="cmt">// .get() = busca um. ? = parâmetro seguro!</span>
+
+  <span class="kw">if</span> (!usuario) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+  res.<span class="met">json</span>(usuario);
+});
+
+<span class="cmt">// ── Criar usuário ──</span>
+app.<span class="met">post</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span> } = req.body;
+  <span class="kw">if</span> (!nome || !email)
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Nome e email obrigatórios'</span> });
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">resultado</span> = db
+      .<span class="met">prepare</span>(<span class="str">'INSERT INTO usuarios (nome, email) VALUES (?, ?)'</span>)
+      .<span class="met">run</span>(nome, email); <span class="cmt">// .run() = executa (INSERT/UPDATE/DELETE)</span>
+
+    <span class="kw">const</span> <span class="var">novo</span> = db
+      .<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE id = ?'</span>)
+      .<span class="met">get</span>(resultado.lastInsertRowid);
+
+    res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>(novo);
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">if</span> (err.message.<span class="met">includes</span>(<span class="str">'UNIQUE'</span>))
+      <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">409</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email já cadastrado'</span> });
+    res.<span class="met">status</span>(<span class="num">500</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Erro interno'</span> });
+  }
+});
+
+<span class="cmt">// ── Deletar usuário ──</span>
+app.<span class="met">delete</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">info</span> = db
+    .<span class="met">prepare</span>(<span class="str">'DELETE FROM usuarios WHERE id = ?'</span>)
+    .<span class="met">run</span>(req.params.id);
+
+  <span class="kw">if</span> (info.changes === <span class="num">0</span>)
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+
+  res.<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Usuário removido!'</span> });
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>, () => console.<span class="met">log</span>(<span class="str">'🚀 API rodando!'</span>));</code></div></pre>
+
+    <div class="warning">
+      <span class="warn-icon">⚠️</span>
+      <div><strong>Sempre use parâmetros (?)!</strong> Nunca concatene strings com dados do usuário no SQL: <code>'SELECT * WHERE nome = ' + req.body.nome</code> é perigoso — isso se chama <em>SQL Injection</em>. O <code>?</code> protege automaticamente.</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"projeto-crud-completo", icon:"🏆", num:20,
+  badge:"Expert", badgeColor:"#bc8cff",
+  title:"Projeto: API de Tarefas completa",
+  subtitle:"Tudo junto: Express + SQLite + Frontend",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🏆</span>
+      <p>Chegou a hora de juntar <strong>tudo</strong>! Vamos construir uma API completa de tarefas com banco de dados, que funciona com um frontend HTML real.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📁 Estrutura do projeto</div>
+      <div class="diagram">
+api-tarefas/
+├── package.json
+├── server.js          ← ponto de entrada
+├── database.js        ← configuração do SQLite
+├── routes/
+│   └── tarefas.js     ← rotas separadas (organizado!)
+└── public/
+    └── index.html     ← frontend
+      </div>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>routes/tarefas.js</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">router</span> = express.<span class="fn">Router</span>(); <span class="cmt">// mini-app de rotas</span>
+<span class="kw">const</span> <span class="var">db</span> = <span class="fn">require</span>(<span class="str">'../database'</span>);
+
+<span class="cmt">// Listar todas</span>
+router.<span class="met">get</span>(<span class="str">'/'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">tarefas</span> = db.<span class="met">prepare</span>(<span class="str">\`
+    SELECT * FROM tarefas ORDER BY criado_em DESC
+  \`</span>).<span class="met">all</span>();
+  res.<span class="met">json</span>(tarefas);
+});
+
+<span class="cmt">// Criar nova</span>
+router.<span class="met">post</span>(<span class="str">'/'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">texto</span> } = req.body;
+  <span class="kw">if</span> (!texto) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Texto obrigatório'</span> });
+
+  <span class="kw">const</span> <span class="var">r</span> = db.<span class="met">prepare</span>(<span class="str">'INSERT INTO tarefas (texto) VALUES (?)'</span>).<span class="met">run</span>(texto);
+  <span class="kw">const</span> <span class="var">nova</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM tarefas WHERE id = ?'</span>).<span class="met">get</span>(r.lastInsertRowid);
+  res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>(nova);
+});
+
+<span class="cmt">// Marcar como feita/não feita (toggle)</span>
+router.<span class="met">patch</span>(<span class="str">'/:id/toggle'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">tarefa</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM tarefas WHERE id = ?'</span>).<span class="met">get</span>(req.params.id);
+  <span class="kw">if</span> (!tarefa) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrada'</span> });
+
+  <span class="kw">const</span> <span class="var">novoEstado</span> = tarefa.feita ? <span class="num">0</span> : <span class="num">1</span>;
+  db.<span class="met">prepare</span>(<span class="str">'UPDATE tarefas SET feita = ? WHERE id = ?'</span>).<span class="met">run</span>(novoEstado, tarefa.id);
+
+  res.<span class="met">json</span>({ ...tarefa, <span class="var">feita</span>: novoEstado });
+});
+
+<span class="cmt">// Deletar</span>
+router.<span class="met">delete</span>(<span class="str">'/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">info</span> = db.<span class="met">prepare</span>(<span class="str">'DELETE FROM tarefas WHERE id = ?'</span>).<span class="met">run</span>(req.params.id);
+  <span class="kw">if</span> (info.changes === <span class="num">0</span>) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrada'</span> });
+  res.<span class="met">json</span>({ <span class="var">ok</span>: <span class="kw">true</span> });
+});
+
+<span class="kw">module</span>.exports = router;</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — ponto de entrada</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">cors</span> = <span class="fn">require</span>(<span class="str">'cors'</span>);
+<span class="kw">const</span> <span class="var">path</span> = <span class="fn">require</span>(<span class="str">'path'</span>);
+<span class="kw">const</span> <span class="var">tarefasRouter</span> = <span class="fn">require</span>(<span class="str">'./routes/tarefas'</span>);
+
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+app.<span class="met">use</span>(<span class="fn">cors</span>());
+app.<span class="met">use</span>(express.<span class="met">json</span>());
+
+<span class="cmt">// Serve os arquivos HTML/CSS/JS estáticos</span>
+app.<span class="met">use</span>(express.<span class="met">static</span>(path.<span class="met">join</span>(__dirname, <span class="str">'public'</span>)));
+
+<span class="cmt">// Registra as rotas de tarefas em /tarefas</span>
+app.<span class="met">use</span>(<span class="str">'/tarefas'</span>, tarefasRouter);
+
+app.<span class="met">listen</span>(<span class="num">3000</span>, () => console.<span class="met">log</span>(<span class="str">'🚀 http://localhost:3000'</span>));</code></div></pre>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Desafio: Expandir o projeto</div>
+      <ol>
+        <li>Adicione uma coluna <code>prioridade</code> (alta/média/baixa) nas tarefas</li>
+        <li>Crie uma rota <code>GET /tarefas?feita=0</code> para filtrar só as pendentes</li>
+        <li>Adicione uma rota <code>PUT /tarefas/:id</code> para editar o texto</li>
+        <li>Mostre um contador no frontend: "X de Y tarefas concluídas"</li>
+      </ol>
+    </div>
+  `
+},
+
+// ─── MÓDULO 7 ────────────────────────────────────────────────────────────
+{
+  modulo:"Módulo 7 — Onde Hospedar",
+  id:"variaveis-ambiente", icon:"🔐", num:21,
+  badge:"Deploy", badgeColor:"#58a6ff",
+  title:"Variáveis de ambiente (.env)",
+  subtitle:"Guardando senhas e configurações com segurança",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔐</span>
+      <p>Nunca coloque <strong>senhas, chaves de API ou URLs de banco de dados</strong> diretamente no código! Se você fizer isso e subir pro GitHub, todo mundo vai ver.</p>
+      <p>A solução são as <em>variáveis de ambiente</em> — configurações que ficam <strong>fora do código</strong>, num arquivo separado que nunca vai pro repositório.</p>
+    </div>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">npm install dotenv</span>
+      </div>
+    </pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">ENV</span><span>.env — NUNCA faça commit deste arquivo!</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt"># Servidor</span>
+PORT=3000
+NODE_ENV=development
+
+<span class="cmt"># Banco de dados</span>
+DB_PATH=./dados.db
+
+<span class="cmt"># Segredos</span>
+JWT_SECRET=minha-senha-super-secreta-123
+API_KEY=sk-abc123xyz
+
+<span class="cmt"># Em produção, a URL seria algo assim:</span>
+DATABASE_URL=postgresql://user:senha@host:5432/banco</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">TEXT</span><span>.gitignore — adicione isso!</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code>node_modules
+.env
+dados.db
+*.log</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — usando o dotenv</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// PRIMEIRO import do arquivo — antes de tudo!</span>
+<span class="fn">require</span>(<span class="str">'dotenv'</span>).<span class="met">config</span>();
+
+<span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+<span class="cmt">// Agora as variáveis estão em process.env</span>
+<span class="kw">const</span> <span class="var">PORTA</span> = process.env.PORT || <span class="num">3000</span>;  <span class="cmt">// usa 3000 se PORT não existir</span>
+<span class="kw">const</span> <span class="var">SEGREDO</span> = process.env.JWT_SECRET;
+
+console.<span class="met">log</span>(<span class="str">'Ambiente:'</span>, process.env.NODE_ENV);
+
+app.<span class="met">listen</span>(<span class="var">PORTA</span>, () => {
+  console.<span class="met">log</span>(<span class="str">\`Servidor na porta \${PORTA}\`</span>);
+});</code></div></pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div>Crie também um arquivo <code>.env.example</code> <em>sem as senhas reais</em> para guiar quem clonar o projeto. Exemplo: <code>JWT_SECRET=coloque-seu-segredo-aqui</code></div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"onde-hospedar", icon:"☁️", num:22,
+  badge:"Deploy", badgeColor:"#58a6ff",
+  title:"Onde hospedar seu Node.js",
+  subtitle:"VPS, Railway, Render e as diferenças",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">☁️</span>
+      <p>Seu servidor Node.js roda lindo no seu computador. Mas pra todo mundo acessar pela internet, você precisa colocá-lo em algum <em>servidor na nuvem</em> que fique ligado 24 horas por dia.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗺️ Mapa das opções</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Plataforma</th><th>Custo</th><th>Dificuldade</th><th>Ideal para</th></tr>
+          <tr><td><strong>Railway</strong></td><td>Free tier generoso</td><td>⭐ Muito fácil</td><td>Aprendizado, projetos pessoais</td></tr>
+          <tr><td><strong>Render</strong></td><td>Free (dorme em 15min)</td><td>⭐ Muito fácil</td><td>Projetos pequenos, portfólio</td></tr>
+          <tr><td><strong>Fly.io</strong></td><td>Free tier</td><td>⭐⭐ Fácil</td><td>Apps com mais controle</td></tr>
+          <tr><td><strong>VPS (Oracle/Digital Ocean)</strong></td><td>De graça a ~$6/mês</td><td>⭐⭐⭐ Médio</td><td>Produção, mais controle</td></tr>
+          <tr><td><strong>AWS / Google Cloud</strong></td><td>Pago (free tier limitado)</td><td>⭐⭐⭐⭐ Difícil</td><td>Grande escala, enterprise</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚂 Deploy no Railway (recomendado pra começar)</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>Suba o código pro GitHub</strong>
+            <p>Certifique que tem <code>.gitignore</code> com <code>node_modules</code> e <code>.env</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>Crie conta em railway.app</strong>
+            <p>Pode entrar com GitHub mesmo</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>New Project → Deploy from GitHub</strong>
+            <p>Selecione seu repositório. O Railway detecta Node automaticamente!</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>Configure as variáveis de ambiente</strong>
+            <p>Na aba Variables, adicione as mesmas do seu <code>.env</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <strong>Gere o domínio público</strong>
+            <p>Settings → Networking → Generate Domain. Pronto — sua API está na internet!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🖥️ No seu VPS (Oracle, Hostinger, etc)</div>
+      <pre class="terminal">
+        <div class="term-header">
+          <div class="term-dot" style="background:#ff5f57"></div>
+          <div class="term-dot" style="background:#febc2e"></div>
+          <div class="term-dot" style="background:#28c840"></div>
+        </div>
+        <div class="term-body">
+<span class="comment"># 1. Instala o Node no servidor (Ubuntu)</span>
+<span class="prompt">$</span> <span class="cmd">curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -</span>
+<span class="prompt">$</span> <span class="cmd">sudo apt-get install -y nodejs</span>
+
+<span class="comment"># 2. Instala o PM2 — mantém o Node rodando 24/7</span>
+<span class="prompt">$</span> <span class="cmd">npm install -g pm2</span>
+
+<span class="comment"># 3. Clona e inicia o projeto</span>
+<span class="prompt">$</span> <span class="cmd">git clone https://github.com/seu/repositorio.git</span>
+<span class="prompt">$</span> <span class="cmd">cd repositorio</span>
+<span class="prompt">$</span> <span class="cmd">npm install --production</span>
+<span class="prompt">$</span> <span class="cmd">pm2 start server.js --name minha-api</span>
+
+<span class="comment"># 4. Auto-iniciar após reboot</span>
+<span class="prompt">$</span> <span class="cmd">pm2 startup</span>
+<span class="prompt">$</span> <span class="cmd">pm2 save</span>
+
+<span class="comment"># Comandos úteis do PM2:</span>
+<span class="prompt">$</span> <span class="cmd">pm2 list</span>        <span class="comment">← ver apps rodando</span>
+<span class="prompt">$</span> <span class="cmd">pm2 logs</span>        <span class="comment">← ver logs</span>
+<span class="prompt">$</span> <span class="cmd">pm2 restart all</span> <span class="comment">← reiniciar</span>
+        </div>
+      </pre>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>No VPS, use o Nginx como proxy reverso!</strong> O Nginx fica na porta 80/443 e redireciona para o seu Node na porta 3000. Isso permite SSL (HTTPS), múltiplos sites no mesmo servidor e melhor performance.</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"nginx-proxy", icon:"🔀", num:23,
+  badge:"Deploy", badgeColor:"#58a6ff",
+  title:"Nginx como proxy reverso",
+  subtitle:"HTTPS e múltiplos projetos no mesmo VPS",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔀</span>
+      <p>O <em>Nginx</em> fica na frente do seu Node.js e funciona como um <strong>porteiro</strong>: recebe todas as requisições na porta 80/443 e encaminha pro Node certo.</p>
+    </div>
+
+    <div class="diagram">
+  Internet
+     │
+     ▼
+  <span class="hl">Nginx (porta 80/443)</span>
+     │
+     ├─── api.seusite.com ────► <span class="hl2">Node.js porta 3000</span>
+     ├─── app.seusite.com ────► <span class="hl3">Node.js porta 3001</span>
+     └─── seusite.com ────────► <span class="hl4">HTML estático</span>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">NGINX</span><span>/etc/nginx/sites-available/minha-api</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code>server {
+    listen 80;
+    server_name api.seudominio.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</code></div></pre>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="comment"># Ativa o site</span>
+<span class="prompt">$</span> <span class="cmd">sudo ln -s /etc/nginx/sites-available/minha-api /etc/nginx/sites-enabled/</span>
+<span class="prompt">$</span> <span class="cmd">sudo nginx -t</span>
+<span class="prompt">$</span> <span class="cmd">sudo systemctl reload nginx</span>
+
+<span class="comment"># Instala SSL gratuito com Let's Encrypt</span>
+<span class="prompt">$</span> <span class="cmd">sudo apt install certbot python3-certbot-nginx</span>
+<span class="prompt">$</span> <span class="cmd">sudo certbot --nginx -d api.seudominio.com</span>
+<span class="comment"># Pronto! HTTPS automático e gratuito!</span>
+      </div>
+    </pre>
+  `
+},
+
+{
+  modulo: null,
+  id:"autenticacao-jwt", icon:"🔑", num:24,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Autenticação com JWT",
+  subtitle:"Login seguro na sua API",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🔑</span>
+      <p>A maioria das APIs precisa de <em>autenticação</em> — saber quem está fazendo o pedido e se tem permissão.</p>
+      <p><em>JWT</em> (JSON Web Token) é o padrão mais usado: ao fazer login, o servidor gera um "crachá digital" assinado. O cliente envia esse crachá em toda requisição.</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🎫 Analogia: a pulseirinha da festa</div>
+      <p>Quando você entra numa festa VIP, o segurança verifica seu documento e te dá uma <strong>pulseira</strong>. Depois, você não precisa mostrar o documento pra cada bar/área — só mostrar a pulseirinha. O JWT é essa pulseirinha!</p>
+    </div>
+
+    <pre class="terminal">
+      <div class="term-header">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+      </div>
+      <div class="term-body">
+<span class="prompt">$</span> <span class="cmd">npm install jsonwebtoken bcryptjs</span>
+<span class="comment"># jsonwebtoken = gerar e verificar tokens</span>
+<span class="comment"># bcryptjs = criptografar senhas (NUNCA guarde senhas em texto puro!)</span>
+      </div>
+    </pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>routes/auth.js — login e registro</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">bcrypt</span> = <span class="fn">require</span>(<span class="str">'bcryptjs'</span>);
+<span class="kw">const</span> <span class="var">jwt</span> = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+<span class="kw">const</span> <span class="var">db</span> = <span class="fn">require</span>(<span class="str">'../database'</span>);
+<span class="kw">const</span> <span class="var">router</span> = express.<span class="fn">Router</span>();
+
+<span class="kw">const</span> <span class="var">SEGREDO</span> = process.env.JWT_SECRET || <span class="str">'segredo-dev'</span>;
+
+<span class="cmt">// POST /auth/registrar</span>
+router.<span class="met">post</span>(<span class="str">'/registrar'</span>, <span class="kw">async</span> (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span>, <span class="var">senha</span> } = req.body;
+
+  <span class="kw">if</span> (!nome || !email || !senha)
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Todos os campos são obrigatórios'</span> });
+
+  <span class="cmt">// Hash da senha — NUNCA salve a senha original!</span>
+  <span class="kw">const</span> <span class="var">hash</span> = <span class="kw">await</span> bcrypt.<span class="met">hash</span>(senha, <span class="num">10</span>); <span class="cmt">// 10 = custo do hash</span>
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">r</span> = db
+      .<span class="met">prepare</span>(<span class="str">'INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)'</span>)
+      .<span class="met">run</span>(nome, email, hash);
+
+    res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Cadastrado com sucesso!'</span>, <span class="var">id</span>: r.lastInsertRowid });
+  } <span class="kw">catch</span> (e) {
+    res.<span class="met">status</span>(<span class="num">409</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email já cadastrado'</span> });
+  }
+});
+
+<span class="cmt">// POST /auth/login</span>
+router.<span class="met">post</span>(<span class="str">'/login'</span>, <span class="kw">async</span> (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">email</span>, <span class="var">senha</span> } = req.body;
+
+  <span class="kw">const</span> <span class="var">usuario</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE email = ?'</span>).<span class="met">get</span>(email);
+  <span class="kw">if</span> (!usuario) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">401</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email ou senha inválidos'</span> });
+
+  <span class="kw">const</span> <span class="var">senhaCorreta</span> = <span class="kw">await</span> bcrypt.<span class="met">compare</span>(senha, usuario.senha);
+  <span class="kw">if</span> (!senhaCorreta) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">401</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email ou senha inválidos'</span> });
+
+  <span class="cmt">// Gera o token com os dados do usuário (id, nome, email)</span>
+  <span class="kw">const</span> <span class="var">token</span> = jwt.<span class="met">sign</span>(
+    { <span class="var">id</span>: usuario.id, <span class="var">nome</span>: usuario.nome, <span class="var">email</span>: usuario.email },
+    <span class="var">SEGREDO</span>,
+    { <span class="var">expiresIn</span>: <span class="str">'7d'</span> } <span class="cmt">// token válido por 7 dias</span>
+  );
+
+  res.<span class="met">json</span>({
+    <span class="var">mensagem</span>: <span class="str">'Login realizado!'</span>,
+    <span class="var">token</span>,
+    <span class="var">usuario</span>: { <span class="var">id</span>: usuario.id, <span class="var">nome</span>: usuario.nome, <span class="var">email</span>: usuario.email }
+  });
+});
+
+<span class="kw">module</span>.exports = router;</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>middlewares/auth.js — verificar token</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">jwt</span> = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+<span class="kw">const</span> <span class="var">SEGREDO</span> = process.env.JWT_SECRET || <span class="str">'segredo-dev'</span>;
+
+<span class="kw">function</span> <span class="fn">autenticar</span>(<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) {
+  <span class="kw">const</span> <span class="var">authHeader</span> = req.headers.authorization;
+
+  <span class="kw">if</span> (!authHeader || !authHeader.<span class="met">startsWith</span>(<span class="str">'Bearer '</span>))
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">401</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Token não fornecido'</span> });
+
+  <span class="kw">const</span> <span class="var">token</span> = authHeader.<span class="met">split</span>(<span class="str">' '</span>)[<span class="num">1</span>]; <span class="cmt">// "Bearer TOKEN" → pega só o TOKEN</span>
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">payload</span> = jwt.<span class="met">verify</span>(token, <span class="var">SEGREDO</span>);
+    req.usuario = payload; <span class="cmt">// disponibiliza dados do usuário na rota</span>
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> (e) {
+    res.<span class="met">status</span>(<span class="num">401</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Token inválido ou expirado'</span> });
+  }
+}
+
+<span class="kw">module</span>.exports = autenticar;</code></div></pre>
+  `
+},
+
+{
+  modulo: null,
+  id:"resumo-proximo-passo", icon:"🗺️", num:25,
+  badge:"Conclusão", badgeColor:"#3fb950",
+  title:"Resumo e próximos passos",
+  subtitle:"O que você aprendeu e para onde ir",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🎓</span>
+      <p>Parabéns! 🎉 Se você chegou até aqui, você já sabe criar um <strong>backend Node.js completo do zero</strong>. Vamos recapitular tudo que você aprendeu:</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✅ O que você já sabe fazer</div>
+      <ul>
+        <li>Instalar Node.js e criar projetos com npm</li>
+        <li>Usar módulos nativos (<code>fs</code>, <code>path</code>, <code>http</code>)</li>
+        <li>Criar servidores com Express</li>
+        <li>Fazer todas as rotas do CRUD (GET, POST, PUT, PATCH, DELETE)</li>
+        <li>Usar middlewares (autenticação, log, CORS)</li>
+        <li>Conectar o frontend HTML com a API via <code>fetch()</code></li>
+        <li>Criar e consultar bancos de dados SQLite com SQL</li>
+        <li>Usar variáveis de ambiente com dotenv</li>
+        <li>Fazer deploy no Railway e em VPS com PM2 + Nginx</li>
+        <li>Implementar autenticação com JWT e bcrypt</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚀 Próximos passos sugeridos</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>PostgreSQL / MySQL</strong>
+            <p>Migrade do SQLite para um banco mais robusto. Use <code>pg</code> (node-postgres) ou <code>mysql2</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>ORM: Prisma ou Sequelize</strong>
+            <p>Escreva "menos SQL" usando objetos JavaScript. O Prisma é o mais moderno e recomendado.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>TypeScript</strong>
+            <p>Adiciona tipos ao JavaScript — pega erros antes de rodar o código. Padrão em projetos sérios.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>Upload de arquivos</strong>
+            <p>Use o pacote <code>multer</code> para receber imagens e arquivos na sua API.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <strong>WebSockets</strong>
+            <p>Comunicação em tempo real (chats, notificações). Use <code>socket.io</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">💡 Projeto prático sugerido</div>
+      <p>Construa um <strong>sistema de blog</strong> com: cadastro/login de usuários, criar/editar/deletar posts, comentários em posts, upload de imagem de capa, e deploy online. Isso vai consolidar tudo que você aprendeu!</p>
+    </div>
+  `
+}
+
+,
+
+// ─── MÓDULO 8 — BOAS PRÁTICAS ─────────────────────────────────────────────
+{
+  modulo:"Módulo 8 — Boas Práticas",
+  id:"tratamento-erros", icon:"🛟", num:26,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Tratamento de erros",
+  subtitle:"Como lidar com o que pode dar errado",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🛟</span>
+      <p>Todo código pode falhar: o banco pode estar fora do ar, o usuário pode mandar dados inválidos, a API externa pode estar lenta. Se você não <em>tratar esses erros</em>, o servidor vai simplesmente travar ou devolver mensagens confusas.</p>
+      <p>Tratar erros bem é o que separa um código amador de um código profissional!</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🏥 Analogia: o pronto-socorro</div>
+      <p>Um hospital não fecha porque um paciente deu entrada em estado grave. Ele tem <strong>protocolos</strong> — cada tipo de problema tem um tratamento específico. No Node.js, os <code>try/catch</code> e middlewares de erro são esses protocolos.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔧 try/catch — capturando erros</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>Sem tratamento vs Com tratamento</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// ❌ Sem tratamento — servidor trava se der erro!</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">usuario</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE id = ?'</span>).<span class="met">get</span>(req.params.id);
+  res.<span class="met">json</span>(usuario); <span class="cmt">// e se o banco estiver offline?</span>
+});
+
+<span class="cmt">// ✅ Com tratamento — servidor sobrevive ao erro</span>
+app.<span class="met">get</span>(<span class="str">'/usuarios/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">usuario</span> = db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE id = ?'</span>).<span class="met">get</span>(req.params.id);
+    <span class="kw">if</span> (!usuario) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+    res.<span class="met">json</span>(usuario);
+  } <span class="kw">catch</span> (err) {
+    console.<span class="met">error</span>(<span class="str">'Erro ao buscar usuário:'</span>, err);
+    res.<span class="met">status</span>(<span class="num">500</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Erro interno do servidor'</span> });
+  }
+});</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚨 Middleware global de erro — o coringa</div>
+      <p>Em vez de repetir <code>try/catch</code> em toda rota, você pode criar um middleware de erro que captura tudo de uma vez. Ele tem <strong>4 parâmetros</strong> — o <code>err</code> na frente é o que sinaliza pro Express que é um handler de erro.</p>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — middleware de erro global</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// Classe de erro customizado</span>
+<span class="kw">class</span> <span class="cls">AppError</span> <span class="kw">extends</span> <span class="cls">Error</span> {
+  <span class="fn">constructor</span>(<span class="var">mensagem</span>, <span class="var">status</span> = <span class="num">500</span>) {
+    <span class="kw">super</span>(mensagem);
+    <span class="kw">this</span>.status = status;
+    <span class="kw">this</span>.name = <span class="str">'AppError'</span>;
+  }
+}
+
+<span class="cmt">// Nas rotas: lança o erro em vez de res.status().json()</span>
+app.<span class="met">get</span>(<span class="str">'/recurso/:id'</span>, (<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">item</span> = buscarNoDb(req.params.id);
+    <span class="kw">if</span> (!item) <span class="kw">throw new</span> <span class="cls">AppError</span>(<span class="str">'Item não encontrado'</span>, <span class="num">404</span>);
+    res.<span class="met">json</span>(item);
+  } <span class="kw">catch</span> (err) {
+    <span class="fn">next</span>(err); <span class="cmt">// passa o erro pro middleware abaixo</span>
+  }
+});
+
+<span class="cmt">// ⬇️ Middleware de erro — DEVE ser o ÚLTIMO app.use()</span>
+app.<span class="met">use</span>((<span class="var">err</span>, <span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) => {
+  console.<span class="met">error</span>(<span class="str">\`[\${new Date().toISOString()}] ERRO:\`</span>, err.message);
+
+  <span class="kw">const</span> <span class="var">status</span> = err.status || <span class="num">500</span>;
+  <span class="kw">const</span> <span class="var">mensagem</span> = process.env.NODE_ENV === <span class="str">'production'</span>
+    ? <span class="str">'Algo deu errado. Tente mais tarde.'</span>  <span class="cmt">// oculta detalhes em produção</span>
+    : err.message;                              <span class="cmt">// mostra detalhes em desenvolvimento</span>
+
+  res.<span class="met">status</span>(status).<span class="met">json</span>({ <span class="var">erro</span>: mensagem, <span class="var">status</span> });
+});
+
+app.<span class="met">listen</span>(<span class="num">3000</span>);</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 Async/await + next(err) — padrão moderno</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>wrapper pra eliminar try/catch repetido</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="cmt">// Função que envolve handlers async e captura erros automaticamente</span>
+<span class="kw">const</span> <span class="fn">asyncHandler</span> = (<span class="var">fn</span>) => (<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) =>
+  <span class="cls">Promise</span>.<span class="met">resolve</span>(<span class="fn">fn</span>(req, res, next)).<span class="met">catch</span>(next);
+
+<span class="cmt">// Sem asyncHandler: precisa de try/catch em todo lugar</span>
+app.<span class="met">get</span>(<span class="str">'/a'</span>, <span class="kw">async</span> (<span class="var">req</span>, <span class="var">res</span>, <span class="var">next</span>) => {
+  <span class="kw">try</span> { res.<span class="met">json</span>(<span class="kw">await</span> <span class="fn">buscarDados</span>()); }
+  <span class="kw">catch</span>(e) { <span class="fn">next</span>(e); }
+});
+
+<span class="cmt">// Com asyncHandler: limpo!</span>
+app.<span class="met">get</span>(<span class="str">'/b'</span>, <span class="fn">asyncHandler</span>(<span class="kw">async</span> (<span class="var">req</span>, <span class="var">res</span>) => {
+  res.<span class="met">json</span>(<span class="kw">await</span> <span class="fn">buscarDados</span>()); <span class="cmt">// erro vai automaticamente pro middleware</span>
+}));</code></div></pre>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">🏋️ Exercício</div>
+      <ol>
+        <li>Crie a classe <code>AppError</code> num arquivo separado (<code>utils/AppError.js</code>)</li>
+        <li>Adicione o middleware de erro global no <code>server.js</code></li>
+        <li>Refatore as rotas do projeto de tarefas para lançar <code>AppError</code> em vez de <code>res.status().json()</code></li>
+        <li>Teste acessar um id que não existe e veja o erro formatado</li>
+      </ol>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"validacao-dados", icon:"✅", num:27,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Validação de dados",
+  subtitle:"Nunca confie no que o usuário manda",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">✅</span>
+      <p>Uma regra de ouro do backend: <strong>nunca confie nos dados que chegam do cliente</strong>. Usuários podem mandar campos faltando, tipos errados, strings gigantes, scripts maliciosos...</p>
+      <p>Validar os dados <em>antes</em> de processar é fundamental pra segurança e estabilidade da API.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔍 Validação manual — o jeito simples</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>validação manual nas rotas</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code>app.<span class="met">post</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span>, <span class="var">idade</span> } = req.body;
+  <span class="kw">const</span> <span class="var">erros</span> = [];
+
+  <span class="cmt">// Checa cada campo</span>
+  <span class="kw">if</span> (!nome || <span class="kw">typeof</span> nome !== <span class="str">'string'</span>)
+    erros.<span class="met">push</span>(<span class="str">'Nome é obrigatório e deve ser texto'</span>);
+  <span class="kw">else if</span> (nome.<span class="met">trim</span>().<span class="atr">length</span> < <span class="num">2</span>)
+    erros.<span class="met">push</span>(<span class="str">'Nome deve ter pelo menos 2 caracteres'</span>);
+
+  <span class="kw">const</span> <span class="var">emailRegex</span> = <span class="str">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span>;
+  <span class="kw">if</span> (!email || !emailRegex.<span class="met">test</span>(email))
+    erros.<span class="met">push</span>(<span class="str">'Email inválido'</span>);
+
+  <span class="kw">if</span> (idade !== <span class="kw">undefined</span>) {
+    <span class="kw">if</span> (<span class="kw">typeof</span> idade !== <span class="str">'number'</span> || idade < <span class="num">0</span> || idade > <span class="num">120</span>)
+      erros.<span class="met">push</span>(<span class="str">'Idade deve ser um número entre 0 e 120'</span>);
+  }
+
+  <span class="kw">if</span> (erros.<span class="atr">length</span> > <span class="num">0</span>)
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erros</span> });
+
+  <span class="cmt">// Dados válidos — processa normalmente</span>
+  <span class="kw">const</span> <span class="var">nomeSeguro</span> = nome.<span class="met">trim</span>();
+  <span class="cmt">// ... salva no banco</span>
+  res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Criado!'</span> });
+});</code></div></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📦 Zod — validação moderna e elegante</div>
+      <p>O <strong>Zod</strong> é a biblioteca de validação mais popular atualmente. Você define um "schema" (molde) e ele valida automaticamente:</p>
+      <pre class="terminal"><div class="term-header"><div class="term-dot" style="background:#ff5f57"></div><div class="term-dot" style="background:#febc2e"></div><div class="term-dot" style="background:#28c840"></div></div><div class="term-body"><span class="prompt">$</span> <span class="cmd">npm install zod</span></div></pre>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>validação com Zod</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> { <span class="var">z</span> } = <span class="fn">require</span>(<span class="str">'zod'</span>);
+
+<span class="cmt">// Define o molde dos dados esperados</span>
+<span class="kw">const</span> <span class="var">schemaUsuario</span> = z.<span class="met">object</span>({
+  nome:  z.<span class="met">string</span>().<span class="met">min</span>(<span class="num">2</span>, <span class="str">'Mínimo 2 caracteres'</span>).<span class="met">max</span>(<span class="num">100</span>),
+  email: z.<span class="met">string</span>().<span class="met">email</span>(<span class="str">'Email inválido'</span>),
+  idade: z.<span class="met">number</span>().<span class="met">min</span>(<span class="num">0</span>).<span class="met">max</span>(<span class="num">120</span>).<span class="met">optional</span>()
+});
+
+app.<span class="met">post</span>(<span class="str">'/usuarios'</span>, (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">const</span> <span class="var">resultado</span> = schemaUsuario.<span class="met">safeParse</span>(req.body);
+
+  <span class="kw">if</span> (!resultado.success) {
+    <span class="kw">const</span> <span class="var">erros</span> = resultado.error.errors.<span class="met">map</span>(<span class="var">e</span> => ({
+      <span class="var">campo</span>: e.path.<span class="met">join</span>(<span class="str">'.'</span>),
+      <span class="var">mensagem</span>: e.message
+    }));
+    <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erros</span> });
+  }
+
+  <span class="kw">const</span> { <span class="var">nome</span>, <span class="var">email</span>, <span class="var">idade</span> } = resultado.data; <span class="cmt">// dados já validados e limpos</span>
+  <span class="cmt">// ... salva no banco</span>
+  res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>({ <span class="var">mensagem</span>: <span class="str">'Criado!'</span> });
+});</code></div></pre>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div><strong>Middleware de validação reutilizável:</strong> crie uma função <code>validar(schema)</code> que retorna um middleware. Aí você usa <code>app.post('/rota', validar(schemaUsuario), handler)</code> — limpo e sem repetição!</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"upload-arquivos", icon:"📎", num:28,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Upload de arquivos",
+  subtitle:"Recebendo imagens e documentos na API",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">📎</span>
+      <p>Quando o usuário envia uma foto de perfil ou um PDF, o arquivo vem diferente de um JSON — ele vem como <em>multipart/form-data</em>. O Express não sabe lidar com isso sozinho.</p>
+      <p>O pacote <strong>multer</strong> resolve isso de forma simples!</p>
+    </div>
+
+    <pre class="terminal"><div class="term-header"><div class="term-dot" style="background:#ff5f57"></div><div class="term-dot" style="background:#febc2e"></div><div class="term-dot" style="background:#28c840"></div></div><div class="term-body"><span class="prompt">$</span> <span class="cmd">npm install multer</span></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — upload com multer</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">multer</span> = <span class="fn">require</span>(<span class="str">'multer'</span>);
+<span class="kw">const</span> <span class="var">path</span>   = <span class="fn">require</span>(<span class="str">'path'</span>);
+<span class="kw">const</span> <span class="var">fs</span>     = <span class="fn">require</span>(<span class="str">'fs'</span>);
+
+<span class="cmt">// Cria a pasta de uploads se não existir</span>
+<span class="kw">if</span> (!fs.<span class="met">existsSync</span>(<span class="str">'uploads'</span>)) fs.<span class="met">mkdirSync</span>(<span class="str">'uploads'</span>);
+
+<span class="cmt">// Configura onde e como salvar os arquivos</span>
+<span class="kw">const</span> <span class="var">storage</span> = multer.<span class="met">diskStorage</span>({
+  <span class="fn">destination</span>: (<span class="var">req</span>, <span class="var">file</span>, <span class="var">cb</span>) => <span class="fn">cb</span>(<span class="kw">null</span>, <span class="str">'uploads/'</span>),
+
+  <span class="fn">filename</span>: (<span class="var">req</span>, <span class="var">file</span>, <span class="var">cb</span>) => {
+    <span class="cmt">// Nome único: timestamp + extensão original</span>
+    <span class="kw">const</span> <span class="var">ext</span> = path.<span class="met">extname</span>(file.originalname);
+    <span class="fn">cb</span>(<span class="kw">null</span>, <span class="str">\`\${Date.now()}-\${Math.random().toString(36).slice(2)}\${ext}\`</span>);
+  }
+});
+
+<span class="cmt">// Filtro: aceita só imagens</span>
+<span class="kw">const</span> <span class="var">filtro</span> = (<span class="var">req</span>, <span class="var">file</span>, <span class="var">cb</span>) => {
+  <span class="kw">const</span> <span class="var">tiposPermitidos</span> = [<span class="str">'image/jpeg'</span>, <span class="str">'image/png'</span>, <span class="str">'image/webp'</span>];
+  <span class="kw">if</span> (tiposPermitidos.<span class="met">includes</span>(file.mimetype)) {
+    <span class="fn">cb</span>(<span class="kw">null</span>, <span class="kw">true</span>);
+  } <span class="kw">else</span> {
+    <span class="fn">cb</span>(<span class="kw">new</span> <span class="cls">Error</span>(<span class="str">'Só imagens JPG, PNG e WebP são permitidas!'</span>), <span class="kw">false</span>);
+  }
+};
+
+<span class="kw">const</span> <span class="var">upload</span> = <span class="fn">multer</span>({
+  storage,
+  fileFilter: filtro,
+  limits: { fileSize: <span class="num">5</span> * <span class="num">1024</span> * <span class="num">1024</span> } <span class="cmt">// máx 5MB</span>
+});
+
+<span class="cmt">// Rota que aceita UMA imagem no campo "foto"</span>
+app.<span class="met">post</span>(<span class="str">'/avatar'</span>, upload.<span class="met">single</span>(<span class="str">'foto'</span>), (<span class="var">req</span>, <span class="var">res</span>) => {
+  <span class="kw">if</span> (!req.file) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">400</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Nenhum arquivo enviado'</span> });
+
+  res.<span class="met">json</span>({
+    <span class="var">mensagem</span>: <span class="str">'Upload realizado!'</span>,
+    <span class="var">arquivo</span>:  req.file.filename,
+    <span class="var">tamanho</span>:  req.file.size,
+    <span class="var">url</span>:      <span class="str">\`http://localhost:3000/uploads/\${req.file.filename}\`</span>
+  });
+});
+
+<span class="cmt">// Servir os arquivos enviados como estáticos</span>
+app.<span class="met">use</span>(<span class="str">'/uploads'</span>, express.<span class="met">static</span>(<span class="str">'uploads'</span>));</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🌐 Como enviar do Frontend</div>
+      <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>frontend — enviando arquivo com fetch</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">async function</span> <span class="fn">enviarFoto</span>(<span class="var">inputFile</span>) {
+  <span class="kw">const</span> <span class="var">formData</span> = <span class="kw">new</span> <span class="cls">FormData</span>(); <span class="cmt">// FormData, não JSON!</span>
+  formData.<span class="met">append</span>(<span class="str">'foto'</span>, inputFile.files[<span class="num">0</span>]); <span class="cmt">// nome do campo = "foto"</span>
+
+  <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'http://localhost:3000/avatar'</span>, {
+    method: <span class="str">'POST'</span>,
+    body: formData
+    <span class="cmt">// NÃO coloque Content-Type: application/json aqui!</span>
+    <span class="cmt">// O FormData define o Content-Type certo automaticamente</span>
+  });
+  <span class="kw">const</span> <span class="var">dados</span> = <span class="kw">await</span> res.<span class="met">json</span>();
+  console.<span class="met">log</span>(dados.url); <span class="cmt">// URL da imagem salva</span>
+}</code></div></pre>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"rate-limiting", icon:"🚧", num:29,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Rate limiting e segurança",
+  subtitle:"Protegendo sua API de abusos",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🚧</span>
+      <p>Se alguém ficar tentando adivinhar uma senha fazendo mil tentativas por segundo, ou tentar derrubar seu servidor com milhões de requisições, você precisa de proteção.</p>
+      <p><em>Rate limiting</em> é como um porteiro que conta: <strong>"você já fez 100 pedidos no último minuto — pode esperar!"</strong></p>
+    </div>
+
+    <pre class="terminal"><div class="term-header"><div class="term-dot" style="background:#ff5f57"></div><div class="term-dot" style="background:#febc2e"></div><div class="term-dot" style="background:#28c840"></div></div><div class="term-body"><span class="prompt">$</span> <span class="cmd">npm install express-rate-limit helmet</span></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — rate limiting + segurança</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">rateLimit</span> = <span class="fn">require</span>(<span class="str">'express-rate-limit'</span>);
+<span class="kw">const</span> <span class="var">helmet</span>    = <span class="fn">require</span>(<span class="str">'helmet'</span>);
+
+<span class="cmt">// Helmet: adiciona headers de segurança HTTP automaticamente</span>
+app.<span class="met">use</span>(<span class="fn">helmet</span>());
+
+<span class="cmt">// Limite geral: 100 req por 15 minutos por IP</span>
+<span class="kw">const</span> <span class="var">limiteGeral</span> = <span class="fn">rateLimit</span>({
+  windowMs: <span class="num">15</span> * <span class="num">60</span> * <span class="num">1000</span>, <span class="cmt">// 15 minutos em ms</span>
+  max: <span class="num">100</span>,
+  message: { <span class="var">erro</span>: <span class="str">'Muitas requisições. Tente em 15 minutos.'</span> },
+  standardHeaders: <span class="kw">true</span>,   <span class="cmt">// envia headers de limite na resposta</span>
+  legacyHeaders:   <span class="kw">false</span>
+});
+
+<span class="cmt">// Limite específico pro login: 5 tentativas por 15 min</span>
+<span class="kw">const</span> <span class="var">limitarLogin</span> = <span class="fn">rateLimit</span>({
+  windowMs: <span class="num">15</span> * <span class="num">60</span> * <span class="num">1000</span>,
+  max: <span class="num">5</span>,
+  message: { <span class="var">erro</span>: <span class="str">'Muitas tentativas de login. Aguarde 15 minutos.'</span> }
+});
+
+app.<span class="met">use</span>(limiteGeral);                     <span class="cmt">// aplica em todas as rotas</span>
+app.<span class="met">use</span>(<span class="str">'/auth/login'</span>, limitarLogin);    <span class="cmt">// limite extra no login</span>
+
+<span class="cmt">// Outras boas práticas de segurança:</span>
+app.<span class="met">use</span>(express.<span class="met">json</span>({ limit: <span class="str">'10kb'</span> })); <span class="cmt">// limita tamanho do body</span>
+
+<span class="cmt">// Remove header que revela que você usa Express</span>
+app.<span class="met">disable</span>(<span class="str">'x-powered-by'</span>);</code></div></pre>
+
+    <div class="card">
+      <div class="card-title">🔐 Checklist de segurança básico</div>
+      <ul>
+        <li>✅ Use <code>helmet</code> pra headers HTTP seguros</li>
+        <li>✅ Use <code>rate-limit</code> especialmente em login e cadastro</li>
+        <li>✅ Sempre use <strong>parâmetros <code>?</code></strong> no SQL (evita SQL Injection)</li>
+        <li>✅ Nunca salve senhas em texto puro — use <code>bcrypt</code></li>
+        <li>✅ Valide <em>todos</em> os dados que chegam do cliente</li>
+        <li>✅ Use HTTPS em produção (Nginx + Let's Encrypt)</li>
+        <li>✅ Nunca coloque segredos no código — use <code>.env</code></li>
+        <li>✅ Limite o tamanho do body (<code>express.json({ limit: '10kb' })</code>)</li>
+      </ul>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"organizacao-mvc", icon:"🏛️", num:30,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"Organização do projeto (MVC)",
+  subtitle:"Como estruturar projetos grandes e profissionais",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🏛️</span>
+      <p>Quando o projeto cresce, jogar tudo num único <code>server.js</code> vira um caos. O padrão <em>MVC</em> (Model-View-Controller) organiza o código em camadas com responsabilidades bem definidas.</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">🍽️ Analogia: um restaurante organizado</div>
+      <p><strong>Model</strong> = a cozinha (sabe fazer o prato, acessa o banco de dados)</p>
+      <p><strong>Controller</strong> = o garçom (recebe o pedido, fala com a cozinha, traz a resposta)</p>
+      <p><strong>View</strong> = o prato que chega na mesa (a resposta JSON ou HTML)</p>
+      <p>Cada um faz só o seu papel — a cozinha não sai servindo mesas!</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📁 Estrutura de projeto profissional</div>
+      <div class="diagram">
+meu-projeto/
+├── src/
+│   ├── <span class="hl">server.js</span>           ← só inicia o app
+│   ├── <span class="hl">app.js</span>              ← configura express, middlewares
+│   │
+│   ├── <span class="hl2">routes/</span>             ← só define as rotas
+│   │   ├── index.js        ← junta todas as rotas
+│   │   ├── usuarios.js
+│   │   └── produtos.js
+│   │
+│   ├── <span class="hl3">controllers/</span>        ← lógica de cada rota
+│   │   ├── usuariosController.js
+│   │   └── produtosController.js
+│   │
+│   ├── <span class="hl4">models/</span>             ← acesso ao banco de dados
+│   │   ├── Usuario.js
+│   │   └── Produto.js
+│   │
+│   ├── middlewares/        ← auth, validação, etc
+│   └── utils/              ← funções auxiliares
+│
+├── .env
+├── .gitignore
+└── package.json
+      </div>
+    </div>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>models/Usuario.js — só acessa o banco</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">db</span> = <span class="fn">require</span>(<span class="str">'../database'</span>);
+
+<span class="kw">const</span> <span class="cls">Usuario</span> = {
+  <span class="fn">listarTodos</span>: () =>
+    db.<span class="met">prepare</span>(<span class="str">'SELECT id, nome, email FROM usuarios'</span>).<span class="met">all</span>(),
+
+  <span class="fn">buscarPorId</span>: (<span class="var">id</span>) =>
+    db.<span class="met">prepare</span>(<span class="str">'SELECT * FROM usuarios WHERE id = ?'</span>).<span class="met">get</span>(id),
+
+  <span class="fn">criar</span>: ({ <span class="var">nome</span>, <span class="var">email</span>, <span class="var">senha</span> }) =>
+    db.<span class="met">prepare</span>(<span class="str">'INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)'</span>)
+      .<span class="met">run</span>(nome, email, senha),
+
+  <span class="fn">atualizar</span>: (<span class="var">id</span>, { <span class="var">nome</span>, <span class="var">email</span> }) =>
+    db.<span class="met">prepare</span>(<span class="str">'UPDATE usuarios SET nome=?, email=? WHERE id=?'</span>)
+      .<span class="met">run</span>(nome, email, id),
+
+  <span class="fn">deletar</span>: (<span class="var">id</span>) =>
+    db.<span class="met">prepare</span>(<span class="str">'DELETE FROM usuarios WHERE id = ?'</span>).<span class="met">run</span>(id)
+};
+
+<span class="kw">module</span>.exports = <span class="cls">Usuario</span>;</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>controllers/usuariosController.js — lógica</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="cls">Usuario</span> = <span class="fn">require</span>(<span class="str">'../models/Usuario'</span>);
+
+<span class="kw">const</span> <span class="var">usuariosController</span> = {
+
+  <span class="fn">listar</span>: (<span class="var">req</span>, <span class="var">res</span>) => {
+    <span class="kw">const</span> <span class="var">usuarios</span> = <span class="cls">Usuario</span>.<span class="fn">listarTodos</span>();
+    res.<span class="met">json</span>(usuarios);
+  },
+
+  <span class="fn">buscar</span>: (<span class="var">req</span>, <span class="var">res</span>) => {
+    <span class="kw">const</span> <span class="var">usuario</span> = <span class="cls">Usuario</span>.<span class="fn">buscarPorId</span>(req.params.id);
+    <span class="kw">if</span> (!usuario) <span class="kw">return</span> res.<span class="met">status</span>(<span class="num">404</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Não encontrado'</span> });
+    res.<span class="met">json</span>(usuario);
+  },
+
+  <span class="fn">criar</span>: (<span class="var">req</span>, <span class="var">res</span>) => {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> <span class="var">resultado</span> = <span class="cls">Usuario</span>.<span class="fn">criar</span>(req.body);
+      res.<span class="met">status</span>(<span class="num">201</span>).<span class="met">json</span>({ <span class="var">id</span>: resultado.lastInsertRowid });
+    } <span class="kw">catch</span> (e) {
+      res.<span class="met">status</span>(<span class="num">409</span>).<span class="met">json</span>({ <span class="var">erro</span>: <span class="str">'Email já existe'</span> });
+    }
+  }
+};
+
+<span class="kw">module</span>.exports = <span class="var">usuariosController</span>;</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>routes/usuarios.js — só define rotas</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">router</span>     = <span class="fn">require</span>(<span class="str">'express'</span>).<span class="fn">Router</span>();
+<span class="kw">const</span> <span class="var">ctrl</span>       = <span class="fn">require</span>(<span class="str">'../controllers/usuariosController'</span>);
+<span class="kw">const</span> <span class="var">autenticar</span> = <span class="fn">require</span>(<span class="str">'../middlewares/auth'</span>);
+
+router.<span class="met">get</span>(<span class="str">'/'</span>,      ctrl.<span class="fn">listar</span>);
+router.<span class="met">get</span>(<span class="str">'/:id'</span>,   ctrl.<span class="fn">buscar</span>);
+router.<span class="met">post</span>(<span class="str">'/'</span>,     ctrl.<span class="fn">criar</span>);
+
+<span class="kw">module</span>.exports = router;</code></div></pre>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <div>Seguindo o MVC, cada arquivo tem <strong>uma responsabilidade só</strong>. Quando algo der errado, você sabe exatamente onde olhar. Isso se chama <em>Separation of Concerns</em> — separação de preocupações.</div>
+    </div>
+  `
+},
+
+{
+  modulo: null,
+  id:"websockets", icon:"⚡", num:31,
+  badge:"Avançado", badgeColor:"#bc8cff",
+  title:"WebSockets — comunicação em tempo real",
+  subtitle:"Chat e notificações ao vivo com Socket.IO",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">⚡</span>
+      <p>O HTTP é como uma troca de cartas: você manda, espera a resposta, acabou. Cada nova informação precisa de um novo pedido.</p>
+      <p><em>WebSocket</em> é como uma <strong>ligação telefônica</strong> — a conexão fica aberta e os dois lados podem falar a qualquer momento, sem precisar "pedir" nada.</p>
+      <p>Isso é essencial para: chats, notificações, placar de jogos ao vivo, dashboards em tempo real...</p>
+    </div>
+
+    <pre class="terminal"><div class="term-header"><div class="term-dot" style="background:#ff5f57"></div><div class="term-dot" style="background:#febc2e"></div><div class="term-dot" style="background:#28c840"></div></div><div class="term-body"><span class="prompt">$</span> <span class="cmd">npm install socket.io</span></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">JavaScript</span><span>server.js — chat em tempo real</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="kw">const</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> <span class="var">http</span>    = <span class="fn">require</span>(<span class="str">'http'</span>);
+<span class="kw">const</span> { <span class="cls">Server</span> } = <span class="fn">require</span>(<span class="str">'socket.io'</span>);
+
+<span class="kw">const</span> <span class="var">app</span>     = <span class="fn">express</span>();
+<span class="kw">const</span> <span class="var">server</span>  = http.<span class="met">createServer</span>(app); <span class="cmt">// Socket.IO precisa do server HTTP</span>
+<span class="kw">const</span> <span class="var">io</span>      = <span class="kw">new</span> <span class="cls">Server</span>(server, {
+  cors: { origin: <span class="str">'*'</span> }
+});
+
+app.<span class="met">use</span>(express.<span class="met">static</span>(<span class="str">'public'</span>));
+
+<span class="kw">const</span> <span class="var">usuarios</span> = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cmt">// socket.id → nome</span>
+
+io.<span class="met">on</span>(<span class="str">'connection'</span>, (<span class="var">socket</span>) => {
+  console.<span class="met">log</span>(<span class="str">\`Usuário conectou: \${socket.id}\`</span>);
+
+  <span class="cmt">// Recebe o nome do usuário</span>
+  socket.<span class="met">on</span>(<span class="str">'entrar'</span>, (<span class="var">nome</span>) => {
+    usuarios.<span class="met">set</span>(socket.id, nome);
+    io.<span class="met">emit</span>(<span class="str">'aviso'</span>, <span class="str">\`\${nome} entrou no chat! 👋\`</span>); <span class="cmt">// avisa a todos</span>
+  });
+
+  <span class="cmt">// Recebe e redistribui mensagem pra todos</span>
+  socket.<span class="met">on</span>(<span class="str">'mensagem'</span>, (<span class="var">texto</span>) => {
+    <span class="kw">const</span> <span class="var">nome</span> = usuarios.<span class="met">get</span>(socket.id) || <span class="str">'Anônimo'</span>;
+    io.<span class="met">emit</span>(<span class="str">'mensagem'</span>, {  <span class="cmt">// io.emit = envia pra TODOS</span>
+      <span class="var">nome</span>,
+      <span class="var">texto</span>,
+      <span class="var">hora</span>: <span class="kw">new</span> <span class="cls">Date</span>().<span class="met">toLocaleTimeString</span>(<span class="str">'pt-BR'</span>)
+    });
+  });
+
+  <span class="cmt">// Desconexão</span>
+  socket.<span class="met">on</span>(<span class="str">'disconnect'</span>, () => {
+    <span class="kw">const</span> <span class="var">nome</span> = usuarios.<span class="met">get</span>(socket.id);
+    usuarios.<span class="met">delete</span>(socket.id);
+    <span class="kw">if</span> (nome) io.<span class="met">emit</span>(<span class="str">'aviso'</span>, <span class="str">\`\${nome} saiu do chat\`</span>);
+  });
+});
+
+server.<span class="met">listen</span>(<span class="num">3000</span>, () => console.<span class="met">log</span>(<span class="str">'Chat rodando!'</span>));</code></div></pre>
+
+    <pre class="code-block"><div class="code-header"><span class="lang">HTML</span><span>public/index.html — cliente do chat</span><button class="copy-btn" onclick="copiarCodigo(this)">Copiar</button></div><div class="code-body"><code><span class="tag">&lt;script</span> <span class="atr">src</span>=<span class="val">"/socket.io/socket.io.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+  <span class="kw">const</span> <span class="var">socket</span> = <span class="fn">io</span>(); <span class="cmt">// conecta automaticamente ao servidor</span>
+
+  <span class="kw">const</span> <span class="var">nome</span> = <span class="fn">prompt</span>(<span class="str">'Seu nome:'</span>);
+  socket.<span class="met">emit</span>(<span class="str">'entrar'</span>, nome); <span class="cmt">// envia evento pro servidor</span>
+
+  <span class="cmt">// Escuta mensagens chegando</span>
+  socket.<span class="met">on</span>(<span class="str">'mensagem'</span>, (<span class="var">msg</span>) => {
+    <span class="kw">const</span> <span class="var">li</span> = document.<span class="met">createElement</span>(<span class="str">'li'</span>);
+    li.textContent = <span class="str">\`[\${msg.hora}] \${msg.nome}: \${msg.texto}\`</span>;
+    document.<span class="met">getElementById</span>(<span class="str">'msgs'</span>).<span class="met">appendChild</span>(li);
+  });
+
+  <span class="kw">function</span> <span class="fn">enviar</span>() {
+    <span class="kw">const</span> <span class="var">input</span> = document.<span class="met">getElementById</span>(<span class="str">'msg'</span>);
+    socket.<span class="met">emit</span>(<span class="str">'mensagem'</span>, input.value); <span class="cmt">// envia pro servidor</span>
+    input.value = <span class="str">''</span>;
+  }
+<span class="tag">&lt;/script&gt;</span></code></div></pre>
+  `
+},
+
+{
+  modulo: null,
+  id:"dicas-finais-node", icon:"🎓", num:32,
+  badge:"Conclusão", badgeColor:"#3fb950",
+  title:"Dicas finais e próximos passos",
+  subtitle:"O que estudar depois e boas práticas do mercado",
+  content:()=>`
+    <div class="explain">
+      <span class="explain-icon">🎓</span>
+      <p>Você terminou o curso! Agora você tem o conhecimento pra criar backends reais com Node.js. Vamos recapitular tudo e traçar o caminho de crescimento.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✅ Você agora sabe</div>
+      <ul>
+        <li>O que é Node.js e por que ele existe</li>
+        <li>Como usar npm e gerenciar dependências</li>
+        <li>Criar servidores com Express e organizar rotas</li>
+        <li>Todos os métodos HTTP: GET, POST, PUT, PATCH, DELETE</li>
+        <li>Middlewares: para log, auth, CORS, rate limiting</li>
+        <li>Conectar frontend ao backend com fetch()</li>
+        <li>SQL completo: CREATE, INSERT, SELECT, UPDATE, DELETE, JOIN</li>
+        <li>Usar SQLite com better-sqlite3 no Node</li>
+        <li>Autenticação com JWT e bcrypt</li>
+        <li>Variáveis de ambiente com dotenv</li>
+        <li>Deploy no Railway e em VPS com PM2 + Nginx</li>
+        <li>Tratamento de erros e validação de dados</li>
+        <li>Upload de arquivos com multer</li>
+        <li>Rate limiting e segurança básica</li>
+        <li>Organização em camadas MVC</li>
+        <li>WebSockets com Socket.IO</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗺️ Mapa do próximo nível</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>PostgreSQL + Prisma ORM</strong>
+            <p>Sai do SQLite, vai pra um banco de produção. Prisma torna as queries elegantes e type-safe.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>TypeScript</strong>
+            <p>JavaScript com tipos — pega erros antes de rodar. Padrão absoluto no mercado hoje.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>Testes automatizados</strong>
+            <p>Use <code>Jest</code> + <code>Supertest</code> para testar suas rotas automaticamente. Código sem teste não vai pra produção em empresas sérias.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>Docker</strong>
+            <p>Empacota sua aplicação em um container — roda igual em qualquer lugar. Padrão de mercado para deploy.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <strong>Redis</strong>
+            <p>Banco de dados em memória, ultra-rápido. Ideal pra cache, sessões e filas de tarefas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏗️ Projeto final sugerido: Sistema de Blog Completo</div>
+      <p>Construa tudo do zero com essas funcionalidades:</p>
+      <ul>
+        <li>Cadastro e login com JWT + bcrypt</li>
+        <li>CRUD de posts (título, conteúdo, imagem de capa)</li>
+        <li>Sistema de comentários</li>
+        <li>Upload de imagens com multer</li>
+        <li>Busca de posts por título (<code>LIKE</code>)</li>
+        <li>Paginação (<code>LIMIT</code> e <code>OFFSET</code> no SQL)</li>
+        <li>Rate limiting nas rotas públicas</li>
+        <li>Deploy no Railway ou VPS</li>
+      </ul>
+      <p>Se você conseguir construir isso, você está pronto pra trabalhar com Node.js profissionalmente! 🚀</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">💬 Última dica</div>
+      <p>A melhor forma de aprender é <strong>construindo</strong>. Não espere saber tudo pra começar um projeto — comece simples, vai adicionando features, e pesquise o que precisar. É assim que todo dev profissional trabalha.</p>
+    </div>
+  `
+}
+
+]; // fim do array lessons
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════════════════════
+let currentIndex = 0;
+let chatHistory  = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════════════════
+function buildSidebar() {
+  const list = document.getElementById('menu-list');
+  list.innerHTML = '';
+  let lastModulo = null;
+
+  lessons.forEach((l, i) => {
+    if (l.modulo && l.modulo !== lastModulo) {
+      lastModulo = l.modulo;
+      const lbl = document.createElement('div');
+      lbl.className = 'modulo-label';
+      lbl.textContent = l.modulo.replace(/Módulo \d+ — /, '');
+      list.appendChild(lbl);
+    }
+    const btn = document.createElement('button');
+    btn.className = 'lesson-btn' + (i === currentIndex ? ' active' : '');
+    btn.innerHTML = `
+      <span class="lesson-num">${String(l.num).padStart(2,'0')}</span>
+      <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.icon} ${l.title}</span>
+      ${l.badge ? `<span class="l-badge" style="background:${l.badgeColor}22;color:${l.badgeColor}">${l.badge}</span>` : ''}
+    `;
+    btn.onclick = () => goToLesson(i);
+    list.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function renderLesson(idx) {
+  const l = lessons[idx];
+  const pct = Math.round(((idx+1)/lessons.length)*100);
+
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-text').textContent = pct+'%';
+
+  document.getElementById('topbar-title').textContent = l.icon+' '+l.title;
+  document.getElementById('breadcrumb').innerHTML =
+    (l.modulo || lessons.slice(0,idx).reverse().find(x=>x.modulo)?.modulo || 'Módulo').replace(/— .+/,'')
+    + ' · <span>'+l.title+'</span>';
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === lessons.length-1;
+
+  document.getElementById('content').innerHTML = `
+    <div class="lesson-header">
+      <div class="lesson-meta">
+        <span class="mod-tag">Aula ${idx+1} de ${lessons.length}</span>
+        ${l.badge ? `<span style="color:${l.badgeColor};font-size:.78rem;font-weight:600">${l.badge}</span>` : ''}
+        <span style="color:var(--texto2)">${pct}% concluído</span>
+      </div>
+      <div class="lesson-title">${l.icon} <span class="accent">${l.title}</span></div>
+      <div class="lesson-subtitle">${l.subtitle}</div>
+    </div>
+    ${l.content()}
+    <div style="height:50px"></div>
+  `;
+  window.scrollTo(0,0);
+  document.getElementById('content').scrollTop = 0;
+}
+
+function goToLesson(idx) {
+  currentIndex = idx;
+  renderLesson(idx);
+  buildSidebar();
+  closeSidebar();
+  // scroll sidebar pra mostrar o item ativo
+  const activeBtns = document.querySelectorAll('.lesson-btn.active');
+  activeBtns.forEach(b => b.scrollIntoView({ block:'nearest', behavior:'smooth' }));
+}
+
+function changeLesson(dir) {
+  const next = currentIndex + dir;
+  if (next >= 0 && next < lessons.length) goToLesson(next);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════════════════════
+function copiarCodigo(btn) {
+  const bloco = btn.closest('.code-block');
+  const code = bloco.querySelector('code');
+  const texto = code.innerText || code.textContent;
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.textContent = 'Copiado!';
+    btn.style.color = 'var(--verde)';
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.style.color = ''; }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MOBILE SIDEBAR
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHAT IA (mesma lógica do aprenda-dom — Gemini + Anthropic)
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleChat() {
+  const p = document.getElementById('chat-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open') && !getKey()) abrirSetupChat();
+}
+function openChat() {
+  document.getElementById('chat-panel').classList.add('open');
+  if (!getKey()) abrirSetupChat();
+}
+function getKey()      { return localStorage.getItem('node_ai_key') || ''; }
+function getProvider() { return localStorage.getItem('node_ai_provider') || 'gemini'; }
+
+function abrirSetupChat() {
+  const box = document.getElementById('chat-setup-box');
+  box.style.display = 'block';
+  document.getElementById('ai-provider').value = getProvider();
+  document.getElementById('ai-key').value = getKey();
+  atualizarAjudaProvider();
+}
+function atualizarAjudaProvider() {
+  const p = document.getElementById('ai-provider').value;
+  document.getElementById('ai-help').innerHTML = p === 'gemini'
+    ? 'Chave gratuita em <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a>'
+    : 'Chave em <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>';
+}
+function salvarChave() {
+  const key = document.getElementById('ai-key').value.trim();
+  if (!key) return alert('Cole sua chave!');
+  localStorage.setItem('node_ai_provider', document.getElementById('ai-provider').value);
+  localStorage.setItem('node_ai_key', key);
+  document.getElementById('chat-setup-box').style.display = 'none';
+  addMsg('Tudo certo! 🎉 Pode perguntar sobre Node.js agora!', 'ai');
+}
+
+function addMsg(txt, role) {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = txt
+    .replace(/```([\s\S]*?)```/g, (_,p) => '<pre>'+p.replace(/</g,'&lt;')+'</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+function addLoading() {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai msg-loading';
+  d.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+
+function systemPrompt() {
+  const l = lessons[currentIndex];
+  return `Você é um professor de Node.js super didático e simpático.
+Responda SEMPRE em português brasileiro, de forma simples como se ensinasse pra quem está começando do zero.
+Use emojis, analogias simples, exemplos de código com blocos de três crases quando necessário.
+Aula atual: "${l.title}" — ${l.subtitle}.
+Seja objetivo (máx 200 palavras). Corrija erros com gentileza.`;
+}
+
+const GEMINI_MODELS = ['gemini-1.5-flash','gemini-2.0-flash-lite','gemini-1.5-flash-8b'];
+
+async function chamarGeminiModelo(key, model, hist) {
+  const contents = hist.map(m => ({
+    role: m.role==='assistant'?'model':'user',
+    parts:[{text:m.content}]
+  }));
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents, systemInstruction:{parts:[{text:systemPrompt()}]} }) }
+  );
+  const d = await r.json();
+  if (d.error) {
+    const e = new Error(d.error.message||'Erro Gemini');
+    e.quota = (d.error.message||'').toLowerCase().includes('quota') || (d.error.status||'').includes('RESOURCE');
+    throw e;
+  }
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || 'Não entendi, tente de novo!';
+}
+async function chamarGemini(key, hist) {
+  let lastErr;
+  for (const m of GEMINI_MODELS) {
+    try { return await chamarGeminiModelo(key, m, hist); }
+    catch(e) { lastErr=e; if(e.quota) continue; throw e; }
+  }
+  throw new Error('Quota esgotada em todos os modelos. Aguarde alguns minutos.');
+}
+async function chamarAnthropic(key, hist) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({ model:'claude-sonnet-4-5-20250929', max_tokens:1000, system:systemPrompt(), messages:hist })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message||'Erro Anthropic');
+  return d.content?.[0]?.text || 'Não entendi, tente de novo!';
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const txt = input.value.trim();
+  if (!txt) return;
+  const key = getKey();
+  if (!key) { openChat(); abrirSetupChat(); return; }
+
+  input.value = ''; input.style.height='auto';
+  addMsg(txt, 'user');
+  openChat();
+  const loading = addLoading();
+  chatHistory.push({ role:'user', content:txt });
+
+  try {
+    const reply = getProvider()==='gemini'
+      ? await chamarGemini(key, chatHistory.slice(-10))
+      : await chamarAnthropic(key, chatHistory.slice(-10));
+    loading.remove();
+    chatHistory.push({ role:'assistant', content:reply });
+    addMsg(reply, 'ai');
+  } catch(err) {
+    loading.remove();
+    const m = err.message||'';
+    let msg;
+    if (m.includes('quota')||m.includes('Quota')||m.includes('esgotada'))
+      msg='⏳ Quota gratuita esgotada. Aguarde alguns minutos e tente novamente.';
+    else if (m.includes('API_KEY')||m.includes('invalid')||m.includes('Invalid'))
+      msg='🔑 Chave inválida. Clique em ⚙️ e verifique a chave.';
+    else
+      msg='❌ Erro: '+m;
+    addMsg(msg, 'ai');
+  }
+}
+
+// auto-resize textarea
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('chat-input');
+  if (inp) inp.addEventListener('input', function() {
+    this.style.height='auto';
+    this.style.height=Math.min(this.scrollHeight,100)+'px';
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+buildSidebar();
+renderLesson(0);
+</script>
+</body>
+</html>
